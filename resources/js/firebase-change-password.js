@@ -29,6 +29,35 @@ function show(id) {
     el.classList.remove('hidden');
 }
 
+function firebaseAuthErrorToMessage(err) {
+    let code = err?.code;
+
+    if (typeof code !== 'string') {
+        const msg = err?.message;
+        if (typeof msg === 'string') {
+            const match = msg.match(/\((auth\/[a-z0-9-]+)\)/i);
+            if (match?.[1]) code = match[1];
+        }
+    }
+
+    if (typeof code !== 'string') return null;
+
+    switch (code) {
+        case 'auth/invalid-credential':
+        case 'auth/invalid-login-credentials':
+        case 'auth/wrong-password':
+            return 'Your current password is incorrect.';
+        case 'auth/too-many-requests':
+            return 'Too many attempts. Please try again later.';
+        case 'auth/requires-recent-login':
+            return 'For security reasons, please log out and log in again, then try changing your password.';
+        case 'auth/network-request-failed':
+            return 'Network error. Please check your internet connection and try again.';
+        default:
+            return null;
+    }
+}
+
 function hide(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -76,7 +105,7 @@ export function initFirebaseChangePassword() {
         }
 
         if (newPassword !== confirm) {
-            setText('firebase-change-password-error', 'Password confirmation does not match.');
+            setText('firebase-change-password-error', 'Passwords do not match.');
             show('firebase-change-password-error');
             return;
         }
@@ -98,7 +127,17 @@ export function initFirebaseChangePassword() {
 
             form.reset();
         } catch (err) {
-            setText('firebase-change-password-error', err?.message || 'Failed to change password.');
+            const friendly = firebaseAuthErrorToMessage(err);
+            if (friendly) {
+                setText('firebase-change-password-error', friendly);
+            } else {
+                const msg = err?.message;
+                if (typeof msg === 'string' && msg.match(/\(auth\/[a-z0-9-]+\)/i)) {
+                    setText('firebase-change-password-error', 'Failed to change password. Please try again.');
+                } else {
+                    setText('firebase-change-password-error', msg || 'Failed to change password.');
+                }
+            }
             show('firebase-change-password-error');
         }
     });

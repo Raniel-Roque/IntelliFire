@@ -48,6 +48,38 @@ function setError(message) {
     el.classList.remove('hidden');
 }
 
+function firebaseAuthErrorToMessage(err) {
+    let code = err?.code;
+
+    if (typeof code !== 'string') {
+        const msg = err?.message;
+        if (typeof msg === 'string') {
+            const match = msg.match(/\((auth\/[a-z0-9-]+)\)/i);
+            if (match?.[1]) code = match[1];
+        }
+    }
+
+    if (typeof code !== 'string') return null;
+
+    switch (code) {
+        case 'auth/invalid-credential':
+        case 'auth/invalid-login-credentials':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+            return 'Invalid email or password.';
+        case 'auth/invalid-email':
+            return 'Please enter a valid email address.';
+        case 'auth/user-disabled':
+            return 'This account has been disabled. Please contact support.';
+        case 'auth/too-many-requests':
+            return 'Too many failed attempts. Please try again later.';
+        case 'auth/network-request-failed':
+            return 'Network error. Please check your internet connection and try again.';
+        default:
+            return null;
+    }
+}
+
 export function initFirebaseEmailPasswordLogin() {
     const form = document.getElementById('firebase-login-form');
     if (!form) return;
@@ -73,7 +105,19 @@ export function initFirebaseEmailPasswordLogin() {
             const data = await exchangeIdTokenForLaravelSession(idToken);
             window.location.href = data.redirect || '/dashboard';
         } catch (err) {
-            setError(err?.message || 'Login failed');
+            const friendly = firebaseAuthErrorToMessage(err);
+            if (friendly) {
+                setError(friendly);
+                return;
+            }
+
+            const msg = err?.message;
+            if (typeof msg === 'string' && msg.match(/\(auth\/[a-z0-9-]+\)/i)) {
+                setError('Login failed. Please check your email and password and try again.');
+                return;
+            }
+
+            setError(msg || 'Login failed');
         }
     });
 }
