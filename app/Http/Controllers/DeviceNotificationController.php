@@ -22,6 +22,8 @@ class DeviceNotificationController extends Controller
             'gas' => ['nullable'],
             'type' => ['nullable', 'string'],
             'timestamp' => ['nullable'],
+            'reason' => ['nullable', 'string'],
+            'message' => ['nullable', 'string'],
         ]);
 
         $roomNumber = $data['room_number'];
@@ -87,10 +89,52 @@ class DeviceNotificationController extends Controller
         $database->getReference('rooms/'.$roomId)->update($roomUpdate);
 
         if ($isEmergency) {
+            $reason = (string) ($data['reason'] ?? '');
+            $message = (string) ($data['message'] ?? '');
+
+            $roomLabel = $roomName ?: ('Room '.$roomNumber);
+            $levelLabel = strtoupper($type);
+
+            $detail = '';
+            if ($reason !== '') {
+                $detail = $reason;
+            } elseif ($message !== '') {
+                $detail = $message;
+            } else {
+                $tempThreshold = (float) env('EMERGENCY_TEMP_THRESHOLD', 60);
+                $gasThreshold = (float) env('EMERGENCY_GAS_THRESHOLD', 1);
+
+                $highTemp = $temperature >= $tempThreshold;
+                $highGas = $gas >= $gasThreshold;
+
+                $isWarning = $type === 'warning';
+
+                if ($highTemp && $highGas) {
+                    $detail = $isWarning
+                        ? 'Elevated Temperature and Gas Levels Detected'
+                        : 'High Temperatures and Gas Levels Found';
+                } elseif ($highTemp) {
+                    $detail = $isWarning
+                        ? 'Elevated Temperature Detected'
+                        : 'High Temperatures Found';
+                } elseif ($highGas) {
+                    $detail = $isWarning
+                        ? 'Elevated Gas Level Detected'
+                        : 'High Gas Levels Found';
+                } else {
+                    $detail = $isWarning
+                        ? 'Readings Require Attention'
+                        : 'Abnormal Readings Detected';
+                }
+            }
+
             $payload = [
                 'room_number' => $roomNumber,
                 'room_id' => $roomId,
                 'room_name' => $roomName,
+                'title' => $levelLabel.': '.$detail.' in '.$roomLabel,
+                'reason' => $reason !== '' ? $reason : null,
+                'message' => $message !== '' ? $message : null,
                 'temperature' => $temperature,
                 'gas' => $gas,
                 'level' => $type,
