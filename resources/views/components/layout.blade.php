@@ -39,8 +39,15 @@
         <style>
             [x-cloak] { display: none !important; }
         </style>
+
+        <livewire:styles />
     </head>
     <body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
         {{ $slot }}
+        
+        <!-- Global Toast Component -->
+        <x-toast />
+
+        <livewire:scripts />
     </body>
 </html>

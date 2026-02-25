@@ -10,6 +10,11 @@
             'href' => route('dashboard'),
             'active' => 'dashboard*'
         ],
+        [
+            'label' => 'Rooms',
+            'href' => route('rooms'),
+            'active' => 'rooms*'
+        ],
     ];
 
     function hasActiveChild($item) {
@@ -113,13 +118,36 @@ x-cloak>
                        'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white': {{ request()->is($item['active']) ? 'false' : 'true' }}
                    }">
                     <div class="shrink-0 w-6 h-6 flex items-center justify-center" :class="isCollapsed ? 'lg:mx-auto' : ''">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
+                        @if ($item['label'] === 'Rooms')
+                            <svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <polyline stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="1,23 1,9 16,1 31,9 31,23" />
+                                <polygon stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="16,15 1,23 16,31 31,23" />
+                                <polyline stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="16,1 16,15 21,9 24,15 26,13 31,23" />
+                                <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6.9,15.9l3.8-2.2c0.8-0.4,1.3-1.3,1.3-2.2v-0.1c0-1.9-2.1-3.1-3.8-2.1l0,0C7.5,9.7,7,10.5,7,11.4V13l-1.3,0.6 C5.3,13.9,5,14.3,5,14.8v0C5,15.8,6.1,16.4,6.9,15.9z" />
+                            </svg>
+                        @else
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                        @endif
                     </div>
                     <span x-show="!isCollapsed" class="ml-3" x-cloak>{{ $item['label'] }}</span>
                 </a>
             @endforeach
         </nav>
     </aside>
+
+    <button @click="toggleMobile()" 
+            x-show="!isOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-90"
+            class="lg:hidden fixed bottom-4 right-4 z-50 p-3 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg transition-colors cursor-pointer">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
 </div>

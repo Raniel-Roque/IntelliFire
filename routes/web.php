@@ -22,3 +22,7 @@ Route::view('/dashboard', 'admin.dashboard')
 Route::view('/change-password', 'auth.change-password')
     ->middleware('auth')
     ->name('change-password');
+
+Route::view('/rooms', 'admin.rooms')
+    ->middleware('auth')
+    ->name('rooms');
