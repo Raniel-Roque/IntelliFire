@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Livewire\Admin\Rooms;
+namespace App\Livewire\Admin\Notifications;
 
 use Livewire\Component;
 use Kreait\Firebase\Contract\Database;
 use Carbon\Carbon;
 
-class Display extends Component
+class Logs extends Component
 {
-    public $search = '';
     public $perPage = 10;
-    public $sortField = 'name';
-    public $sortDirection = 'asc';
     public $page = 1;
-
+    public $search = '';
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
     public $statusFilter = 'all';
     public $showFilterDropdown = false;
     public $dateFrom = '';
@@ -22,36 +21,29 @@ class Display extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'page' => ['except' => 1],
-        'perPage' => ['except' => 10],
-        'sortField' => ['except' => 'name'],
-        'sortDirection' => ['except' => 'asc'],
+        'sortField' => ['except' => 'created_at'],
+        'sortDirection' => ['except' => 'desc'],
         'statusFilter' => ['except' => 'all'],
         'dateFrom' => ['except' => ''],
         'dateTo' => ['except' => ''],
     ];
 
-    protected $listeners = ['refreshRooms' => '$refresh'];
-
-    public function mount()
+    public function mount(): void
     {
-        $this->search = request()->input('search', '');
-        $this->page = request()->input('page', 1);
-
+        $this->page = (int) request()->input('page', 1);
+        $this->search = (string) request()->input('search', '');
+        $this->sortField = (string) request()->input('sortField', 'created_at');
+        $this->sortDirection = (string) request()->input('sortDirection', 'desc');
         $this->statusFilter = (string) request()->input('statusFilter', 'all');
         $this->dateFrom = (string) request()->input('dateFrom', '');
         $this->dateTo = (string) request()->input('dateTo', '');
 
-        if (!in_array($this->statusFilter, ['all', 'normal', 'warning', 'urgent'], true)) {
-            $this->statusFilter = 'all';
-        }
+        $this->perPage = 10;
+        if (!in_array($this->sortDirection, ['asc', 'desc'], true)) $this->sortDirection = 'desc';
+        if (!in_array($this->statusFilter, ['all', 'urgent', 'warning'], true)) $this->statusFilter = 'all';
     }
 
     public function updatingSearch(): void
-    {
-        $this->page = 1;
-    }
-
-    public function updatingPerPage(): void
     {
         $this->page = 1;
     }
@@ -113,79 +105,95 @@ class Display extends Component
         $this->showFilterDropdown = false;
     }
 
-    public function sortBy($field)
+    public function sortBy($field): void
     {
+        $allowed = ['created_at', 'room_name', 'gas', 'temperature', 'status'];
+        if (!in_array($field, $allowed, true)) return;
+
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortField = $field;
-            $this->sortDirection = 'asc';
+            $this->sortDirection = $field === 'created_at' ? 'desc' : 'asc';
         }
         $this->page = 1;
     }
 
-    protected function getRoomsFromFirebase(): array
+    protected function normalizeEntry(string $id, array $data): array
     {
-        $snapshot = app(Database::class)->getReference('rooms')->getSnapshot();
+        $level = strtolower((string) ($data['level'] ?? 'warning'));
+        $status = $level === 'urgent' ? 'URGENT' : 'WARNING';
+
+        $roomName = (string) ($data['room_name'] ?? '');
+        if ($roomName === '') {
+            $roomNumber = $data['room_number'] ?? null;
+            $roomName = $roomNumber !== null ? ('Room '.$roomNumber) : '—';
+        }
+
+        $temperature = $data['temperature'] ?? 0;
+        $gas = $data['gas'] ?? 0;
+
+        if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
+        if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
+
+        $description = (string) ($data['reason'] ?? '');
+        if ($description === '') $description = (string) ($data['message'] ?? '');
+
+        if ($description === '') {
+            $title = (string) ($data['title'] ?? '');
+            if ($title !== '') {
+                $title = preg_replace('/^(WARNING|URGENT)\s*:\s*/i', '', $title) ?? $title;
+                $title = preg_replace('/\s+in\s+.+$/i', '', $title) ?? $title;
+                $description = trim($title);
+            }
+        }
+
+        if ($description === '') $description = '—';
+
+        return [
+            'id' => $id,
+            'created_at' => (string) ($data['created_at'] ?? ''),
+            'room_name' => $roomName,
+            'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
+            'gas' => is_numeric($gas) ? (float) $gas : 0,
+            'status' => $status,
+            'description' => $description,
+        ];
+    }
+
+    protected function getLogsFromFirebase(): array
+    {
+        $snapshot = app(Database::class)->getReference('emergencies/log')->getSnapshot();
         $raw = $snapshot->getValue() ?? [];
 
-        $rooms = [];
-        foreach ($raw as $id => $data) {
-            if (!is_array($data)) continue;
-
-            $temperature = $data['temperature'] ?? 0;
-            $gas = $data['gas'] ?? 0;
-
-            if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') {
-                $temperature = 0;
-            }
-            if (is_string($gas) && strtolower(trim($gas)) === 'n/a') {
-                $gas = 0;
-            }
-
-            $rooms[] = [
-                'id' => $id,
-                'name' => $data['name'] ?? '',
-                'room_number' => $data['room_number'] ?? null,
-                'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
-                'gas' => is_numeric($gas) ? (float) $gas : 0,
-                'created_at' => $data['created_at'] ?? '',
-                'emergency_level' => $data['emergency_level'] ?? null,
-                'last_emergency_at' => $data['last_emergency_at'] ?? null,
-            ];
-        }
-
-        foreach ($rooms as &$r) {
-            $lvl = strtolower((string) ($r['emergency_level'] ?? ''));
-            if ($lvl === 'urgent') {
-                $r['status'] = 'Urgent';
-                $r['status_key'] = 'urgent';
-            } elseif ($lvl === 'warning') {
-                $r['status'] = 'Warning';
-                $r['status_key'] = 'warning';
-            } else {
-                $r['status'] = 'Normal';
-                $r['status_key'] = 'normal';
+        $items = [];
+        if (is_array($raw)) {
+            foreach ($raw as $id => $data) {
+                if (!is_string($id)) continue;
+                if (!is_array($data)) continue;
+                $items[] = $this->normalizeEntry($id, $data);
             }
         }
-        unset($r);
 
-        // Filter by search
-        if ($this->search) {
-            $rooms = array_filter($rooms, fn($r) => stripos($r['name'], $this->search) !== false);
+        if ($this->search !== '') {
+            $needle = mb_strtolower($this->search);
+            $items = array_filter($items, function ($row) use ($needle) {
+                $hay = mb_strtolower((string) ($row['room_name'] ?? ''));
+                return str_contains($hay, $needle);
+            });
         }
 
         if ($this->statusFilter !== 'all') {
-            $want = strtolower($this->statusFilter);
-            $rooms = array_filter($rooms, fn($r) => (($r['status_key'] ?? 'normal') === $want));
+            $want = strtoupper($this->statusFilter);
+            $items = array_filter($items, fn($row) => strtoupper((string) ($row['status'] ?? '')) === $want);
         }
 
         if ($this->dateFrom !== '' || $this->dateTo !== '') {
             $from = $this->dateFrom !== '' ? Carbon::parse($this->dateFrom)->startOfDay() : null;
             $to = $this->dateTo !== '' ? Carbon::parse($this->dateTo)->endOfDay() : null;
 
-            $rooms = array_filter($rooms, function ($r) use ($from, $to) {
-                $rawTs = (string) (($r['last_emergency_at'] ?? $r['created_at']) ?? '');
+            $items = array_filter($items, function ($row) use ($from, $to) {
+                $rawTs = (string) ($row['created_at'] ?? '');
                 if ($rawTs === '') return false;
                 try {
                     $ts = Carbon::parse($rawTs);
@@ -199,9 +207,8 @@ class Display extends Component
             });
         }
 
-        // Sort
-        $numericFields = ['room_number', 'temperature', 'gas'];
-        usort($rooms, function ($a, $b) use ($numericFields) {
+        $numericFields = ['gas', 'temperature'];
+        usort($items, function ($a, $b) use ($numericFields) {
             $av = $a[$this->sortField] ?? '';
             $bv = $b[$this->sortField] ?? '';
 
@@ -216,43 +223,41 @@ class Display extends Component
             return $this->sortDirection === 'asc' ? $cmp : -$cmp;
         });
 
-        return array_values($rooms);
+        return array_values($items);
     }
 
     public function getPaginationData(): array
     {
-        $rooms = $this->getRoomsFromFirebase();
-        $total = count($rooms);
+        $logs = $this->getLogsFromFirebase();
+        $total = count($logs);
         $lastPage = (int) ceil($total / $this->perPage);
-        $currentPage = max(1, min($this->page, $lastPage ?: 1));
+        $currentPage = max(1, min((int) $this->page, $lastPage ?: 1));
 
         $offset = ($currentPage - 1) * $this->perPage;
-        $paged = array_slice($rooms, $offset, $this->perPage);
+        $paged = array_slice($logs, $offset, $this->perPage);
 
-        // Simple pagination UI: show up to 3 pages
-        if ($lastPage <= 3) {
+        $window = 10;
+        if ($lastPage <= $window) {
             $startPage = 1;
-            $endPage = $lastPage;
-        } elseif ($currentPage == 1) {
-            $startPage = 1;
-            $endPage = min(3, $lastPage);
-        } elseif ($currentPage == $lastPage) {
-            $startPage = max(1, $lastPage - 2);
             $endPage = $lastPage;
         } else {
-            $startPage = max(1, $currentPage - 1);
-            $endPage = min($lastPage, $currentPage + 1);
+            $half = (int) floor($window / 2);
+            $startPage = max(1, $currentPage - $half);
+            $endPage = $startPage + $window - 1;
+            if ($endPage > $lastPage) {
+                $endPage = $lastPage;
+                $startPage = $endPage - $window + 1;
+            }
         }
-        $pages = range($startPage, $endPage);
 
         return [
-            'rooms' => $paged,
-            'pages' => $pages,
+            'logs' => $paged,
+            'pages' => $lastPage ? range($startPage, $endPage) : [],
             'currentPage' => $currentPage,
             'lastPage' => $lastPage,
             'total' => $total,
-            'search' => $this->search,
             'perPage' => $this->perPage,
+            'search' => $this->search,
             'sortField' => $this->sortField,
             'sortDirection' => $this->sortDirection,
             'statusFilter' => $this->statusFilter,
@@ -262,7 +267,7 @@ class Display extends Component
         ];
     }
 
-    public function gotoPage($page)
+    public function gotoPage($page): void
     {
         $page = (int) $page;
         $data = $this->getPaginationData();
@@ -271,6 +276,6 @@ class Display extends Component
 
     public function render()
     {
-        return view('livewire.admin.rooms.display', $this->getPaginationData());
+        return view('livewire.admin.notifications.logs', $this->getPaginationData());
     }
 }

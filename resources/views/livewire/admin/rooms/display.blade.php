@@ -14,8 +14,63 @@
                     <input
                         wire:model.live="search"
                         placeholder="Search rooms..."
-                        class="w-full pl-11 pr-4 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm dark:shadow-md"
+                        class="w-full pl-11 pr-12 py-3 text-sm bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm dark:shadow-md"
                     />
+
+                    <button type="button" wire:click="toggleFilterDropdown" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer" title="Filters">
+                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#9CA3AF" class="w-5 h-5">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M15 2v1.67l-5 4.759V14H6V8.429l-5-4.76V2h14zM7 8v5h2V8l5-4.76V3H2v.24L7 8z"/>
+                        </svg>
+                    </button>
+
+                    @if ($showFilterDropdown)
+                        <div class="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                            <div class="p-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Status</h3>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                                                <input type="radio" wire:model.live="statusFilter" value="all" class="text-orange-600 focus:ring-orange-500">
+                                                <span>All</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                                                <input type="radio" wire:model.live="statusFilter" value="normal" class="text-orange-600 focus:ring-orange-500">
+                                                <span>Normal</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                                                <input type="radio" wire:model.live="statusFilter" value="warning" class="text-orange-600 focus:ring-orange-500">
+                                                <span>Warning</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+                                                <input type="radio" wire:model.live="statusFilter" value="urgent" class="text-orange-600 focus:ring-orange-500">
+                                                <span>Urgent</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Date Range</h3>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">From</label>
+                                                <input type="date" wire:model.live="dateFrom" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">To</label>
+                                                <input type="date" wire:model.live="dateTo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <button type="button" wire:click="resetFilters" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">Reset</button>
+                                    <button type="button" wire:click="toggleFilterDropdown" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">Done</button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 <button type="button" wire:click="$dispatch('openCreateModal')" class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 md:mr-2">
@@ -24,6 +79,37 @@
                     <span class="hidden md:inline">Add Room</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-2 mb-6 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-wrap gap-3">
+            <div class="text-sm font-medium text-gray-700 dark:text-gray-300 self-center">Today:</div>
+            <button
+                type="button"
+                wire:click="quickFilterTodayStatus('urgent')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                    {{ ($statusFilter === 'urgent' && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                        ? 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}"
+            >
+                Urgent
+            </button>
+            <button
+                type="button"
+                wire:click="quickFilterTodayStatus('warning')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
+                    {{ ($statusFilter === 'warning' && $dateFrom === now()->format('Y-m-d') && $dateTo === now()->format('Y-m-d'))
+                        ? 'bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}"
+            >
+                Warning
+            </button>
+        </div>
+
+        <div class="text-xs text-gray-600 dark:text-gray-300">
+            <span class="font-medium">Fire Dept:</span>
+            <a href="tel:+6391234567890" class="font-semibold text-gray-900 dark:text-gray-100 hover:underline">+63 9123 456 7890</a>
         </div>
     </div>
 
@@ -61,6 +147,9 @@
                                     </svg>
                                 @endif
                             </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Status</p>
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('temperature')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
@@ -105,6 +194,15 @@
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $room['name'] }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
+                                @if (($room['status_key'] ?? 'normal') === 'urgent')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">Urgent</span>
+                                @elseif (($room['status_key'] ?? 'normal') === 'warning')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Warning</span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Normal</span>
+                                @endif
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $room['temperature'] ?? 0 }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
@@ -129,7 +227,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M33.18,26.11,20.35,13.28A9.28,9.28,0,0,0,7.54,2.79l-1.34.59,5.38,5.38L8.76,11.59,3.38,6.21,2.79,7.54A9.27,9.27,0,0,0,13.28,20.35L26.11,33.18a2,2,0,0,0,2.83,0l4.24-4.24A2,2,0,0,0,33.18,26.11Zm-5.66,5.66L13.88,18.12l-.57.16a7.27,7.27,0,0,1-9.31-7,7.2,7.2,0,0,1,.15-1.48l4.61,4.61,5.66-5.66L9.81,4.15a7.27,7.27,0,0,1,8.47,9.16l-.16.57L31.77,27.53Z"></path>
@@ -151,6 +249,15 @@
                     <div class="flex justify-between items-start">
                         <div class="space-y-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $room['room_number'] ?? '—' }}. {{ $room['name'] }}</p>
+                            <div>
+                                @if (($room['status_key'] ?? 'normal') === 'urgent')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">Urgent</span>
+                                @elseif (($room['status_key'] ?? 'normal') === 'warning')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Warning</span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Normal</span>
+                                @endif
+                            </div>
                             <div class="grid grid-cols-2 gap-3 pt-1">
                                 <div class="w-full flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                                     <svg class="w-4 h-4 shrink-0 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -32,14 +32,38 @@ export function initFirebaseEmergencyListener() {
     const latestRef = ref(db, 'emergencies/latest');
 
     let lastSeenKey = null;
+    let isInitialized = false;
+
+    try {
+        lastSeenKey = sessionStorage.getItem('emergencyLastSeenKey');
+    } catch (e) {
+        // ignore
+    }
 
     onValue(latestRef, (snapshot) => {
         const val = snapshot.val();
         if (!val || typeof val !== 'object') return;
 
         const key = `${val.created_at ?? ''}|${val.room_number ?? ''}|${val.level ?? ''}`;
+
+        if (!isInitialized) {
+            isInitialized = true;
+            lastSeenKey = key;
+            try {
+                sessionStorage.setItem('emergencyLastSeenKey', lastSeenKey);
+            } catch (e) {
+                // ignore
+            }
+            return;
+        }
+
         if (key === lastSeenKey) return;
         lastSeenKey = key;
+        try {
+            sessionStorage.setItem('emergencyLastSeenKey', lastSeenKey);
+        } catch (e) {
+            // ignore
+        }
 
         const level = String(val.level || 'warning');
         const roomName = val.room_name ?? null;

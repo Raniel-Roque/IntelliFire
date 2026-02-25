@@ -24,6 +24,10 @@
              window.addEventListener('showToast', (event) => {
                  this.showToast(event.detail.message, event.detail.type, event.detail.persistent);
              });
+
+             window.addEventListener('clearToasts', () => {
+                 this.toasts = [];
+             });
          },
          showToast(message, type = 'info', persistent = false) {
              const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
