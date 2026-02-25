@@ -50,7 +50,7 @@ return [
              *
              */
 
-            'credentials' => env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
+            'credentials' => env('FIREBASE_CREDENTIALS') ?: (env('FIREBASE_CREDENTIALS_JSON') ? json_decode(env('FIREBASE_CREDENTIALS_JSON'), true) : env('GOOGLE_APPLICATION_CREDENTIALS')),
 
             /*
              * ------------------------------------------------------------------------
