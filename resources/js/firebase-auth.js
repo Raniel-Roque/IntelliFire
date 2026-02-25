@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { getApps, initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 function getFirebaseConfig() {
@@ -58,7 +58,7 @@ export function initFirebaseEmailPasswordLogin() {
         return;
     }
 
-    const app = initializeApp(config);
+    const app = getApps().length ? getApps()[0] : initializeApp(config);
     const auth = getAuth(app);
 
     form.addEventListener('submit', async (e) => {

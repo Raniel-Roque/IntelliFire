@@ -18,3 +18,7 @@ Route::post('/logout', [\App\Http\Controllers\Auth\FirebaseSessionController::cl
 Route::view('/dashboard', 'admin.dashboard')
     ->middleware('auth')
     ->name('dashboard');
+
+Route::view('/change-password', 'auth.change-password')
+    ->middleware('auth')
+    ->name('change-password');
