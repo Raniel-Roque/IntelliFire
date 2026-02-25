@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Auth\FirebaseUser;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Kreait\Firebase\Contract\Auth as FirebaseAuth;
+use Kreait\Firebase\Contract\Database;
 
 class FirebaseSessionController extends Controller
 {
-    public function store(Request $request, FirebaseAuth $firebaseAuth)
+    public function store(Request $request, FirebaseAuth $firebaseAuth, Database $database)
     {
         $data = $request->validate([
             'id_token' => ['required', 'string'],
@@ -24,26 +23,16 @@ class FirebaseSessionController extends Controller
         $email = $verifiedToken->claims()->get('email');
         $name = $verifiedToken->claims()->get('name') ?? ($email ? explode('@', $email)[0] : $uid);
 
-        $user = User::query()->where('firebase_uid', $uid)->first();
+        $profile = [
+            'firebase_uid' => $uid,
+            'email' => $email,
+            'name' => $name,
+            'updated_at' => now()->toISOString(),
+        ];
 
-        if (!$user && $email) {
-            $user = User::query()->where('email', $email)->first();
-        }
+        $database->getReference('users/'.$uid)->update($profile);
 
-        if (!$user) {
-            $user = new User();
-        }
-
-        $user->firebase_uid = $uid;
-        $user->email = $email ?? $user->email ?? ($uid.'@firebase.local');
-        $user->name = $name ?? $user->name ?? 'User';
-
-        if (!$user->password) {
-            $user->password = Hash::make(Str::random(32));
-        }
-        $user->save();
-
-        Auth::login($user);
+        Auth::login(FirebaseUser::fromProfile($uid, $profile));
         $request->session()->regenerate();
 
         return response()->json([
