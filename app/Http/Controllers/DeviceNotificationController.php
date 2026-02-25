@@ -10,7 +10,7 @@ class DeviceNotificationController extends Controller
     public function store(Request $request, Database $database)
     {
         $providedKey = (string) $request->header('X-DEVICE-KEY', '');
-        $expectedKey = (string) env('DEVICE_INGEST_KEY', '');
+        $expectedKey = (string) config('intellifire.device_ingest_key', '');
 
         if ($expectedKey === '' || !hash_equals($expectedKey, $providedKey)) {
             return response()->json(['ok' => false, 'message' => 'Unauthorized'], 401);
@@ -101,8 +101,8 @@ class DeviceNotificationController extends Controller
             } elseif ($message !== '') {
                 $detail = $message;
             } else {
-                $tempThreshold = (float) env('EMERGENCY_TEMP_THRESHOLD', 60);
-                $gasThreshold = (float) env('EMERGENCY_GAS_THRESHOLD', 1);
+                $tempThreshold = (float) config('intellifire.emergency.temp_threshold', 60);
+                $gasThreshold = (float) config('intellifire.emergency.gas_threshold', 1);
 
                 $highTemp = $temperature >= $tempThreshold;
                 $highGas = $gas >= $gasThreshold;
