@@ -167,7 +167,7 @@
                         </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('gas')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
-                                Gas (m³)
+                                Gas (ppm)
                                 @if ($sortField === 'gas')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')

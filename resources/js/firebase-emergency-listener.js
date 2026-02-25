@@ -74,7 +74,7 @@ export function initFirebaseEmergencyListener() {
         const type = level === 'urgent' ? 'error' : 'warning';
         const levelLabel = String(level || 'warning').toUpperCase();
         const roomLabel = roomName ? String(roomName) : `Room ${roomNumber}`;
-        const message = `${levelLabel}: ${roomLabel}\nTemp: ${temp}°C\nGas: ${gas} m³`;
+        const message = `${levelLabel}: ${roomLabel}\nTemp: ${temp}°C\nGas: ${gas} ppm`;
 
         window.dispatchEvent(new CustomEvent('showToast', { detail: { message, type, persistent: true } }));
         window.dispatchEvent(new CustomEvent('refreshRoomsRealtime'));

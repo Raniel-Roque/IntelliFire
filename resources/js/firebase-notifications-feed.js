@@ -76,7 +76,7 @@ function buildCardHtml(item) {
                 </div>
                 <div class="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                     <p class="text-xs text-gray-600 dark:text-gray-300">Gas</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(gas)} <span class="text-xs font-medium text-gray-500 dark:text-gray-400">m<sup>3</sup></span></p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(gas)} <span class="text-xs font-medium text-gray-500 dark:text-gray-400">ppm</span></p>
                 </div>
             </div>
         </button>
