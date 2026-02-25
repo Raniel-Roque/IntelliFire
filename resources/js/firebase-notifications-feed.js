@@ -133,7 +133,8 @@ export function initFirebaseNotificationsFeed() {
             }
 
             scrollToMaps();
-            window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { url } }));
+            const decodedUrl = decodeURI(url);
+            window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { url: decodedUrl } }));
         });
     }
 

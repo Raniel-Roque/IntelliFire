@@ -83,6 +83,7 @@ class DeviceNotificationController extends Controller
             $roomUpdate['emergency_level'] = $type;
             $roomUpdate['last_emergency_at'] = $nowIso;
         } else {
+            $roomUpdate['emergency_level'] = null;
             $roomUpdate['last_info_at'] = $nowIso;
         }
 
