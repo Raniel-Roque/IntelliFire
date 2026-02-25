@@ -109,7 +109,7 @@
 
         <div class="text-xs text-gray-600 dark:text-gray-300">
             <span class="font-medium">Fire Dept:</span>
-            <a href="tel:+6391234567890" class="font-semibold text-gray-900 dark:text-gray-100 hover:underline">+63 9123 456 7890</a>
+            <a href="tel:+639663501733" class="font-semibold text-gray-900 dark:text-gray-100 hover:underline">+63 966 350 1733</a>
         </div>
     </div>
 

@@ -96,14 +96,14 @@
                         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                             <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
                                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Fire Department</p>
-                                <a href="tel:+6391234567890" class="mt-1 inline-block text-lg font-semibold text-gray-900 dark:text-gray-100 hover:underline">
-                                    +63 9123 456 7890
+                                <a href="tel:+639663501733" class="mt-1 inline-block text-lg font-semibold text-gray-900 dark:text-gray-100 hover:underline">
+                                    +63 966 350 1733
                                 </a>
                             </div>
                             <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
                                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Owner</p>
-                                <a href="tel:+6391234567890" class="mt-1 inline-block text-lg font-semibold text-gray-900 dark:text-gray-100 hover:underline">
-                                    +63 9123 456 7890
+                                <a href="tel:+639663501733" class="mt-1 inline-block text-lg font-semibold text-gray-900 dark:text-gray-100 hover:underline">
+                                    +63 966 350 1733
                                 </a>
                             </div>
                         </div>
