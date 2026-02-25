@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DeviceNotificationController;
 
 Route::get('/', function () {
     return view('landing');
@@ -26,3 +27,6 @@ Route::view('/change-password', 'auth.change-password')
 Route::view('/rooms', 'admin.rooms')
     ->middleware('auth')
     ->name('rooms');
+
+Route::post('/device/notify', [DeviceNotificationController::class, 'store'])
+    ->name('device.notify');
