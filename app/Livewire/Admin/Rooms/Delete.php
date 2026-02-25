@@ -27,14 +27,7 @@ class Delete extends Component
     public function deleteRoom()
     {
         try {
-            $snapshot = app(Database::class)->getReference('rooms/'.$this->roomId)->getSnapshot();
-            $data = $snapshot->getValue();
-
             app(Database::class)->getReference('rooms/'.$this->roomId)->remove();
-
-            if (is_array($data) && isset($data['room_number']) && is_numeric($data['room_number'])) {
-                app(Database::class)->getReference('room_number_index/'.((int) $data['room_number']))->remove();
-            }
 
             $roomName = $this->roomName;
             $this->closeModal();

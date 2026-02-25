@@ -50,8 +50,6 @@ class Create extends Component
                 'created_at' => now()->toISOString(),
             ]);
 
-            app(Database::class)->getReference('room_number_index/'.$nextRoomNumber)->set($newRef->getKey());
-
             $roomName = $this->name;
             $this->closeModal();
             $this->dispatch('refreshRooms');

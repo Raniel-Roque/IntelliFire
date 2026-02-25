@@ -33,8 +33,24 @@ class DeviceNotificationController extends Controller
         $type = strtolower((string) ($data['type'] ?? 'info'));
         $isEmergency = in_array($type, ['warning', 'urgent'], true);
 
-        $roomIdSnapshot = $database->getReference('room_number_index/'.$roomNumber)->getSnapshot();
-        $roomId = $roomIdSnapshot->getValue();
+        $roomId = null;
+        $roomName = null;
+
+        $roomsSnapshot = $database->getReference('rooms')->getSnapshot();
+        $roomsRaw = $roomsSnapshot->getValue() ?? [];
+
+        if (is_array($roomsRaw) && $roomsRaw !== []) {
+            foreach ($roomsRaw as $candidateId => $roomData) {
+                if (!is_array($roomData)) continue;
+                if (!isset($roomData['room_number']) || !is_numeric($roomData['room_number'])) continue;
+
+                if (((int) $roomData['room_number']) === $roomNumber) {
+                    $roomId = (string) $candidateId;
+                    $roomName = isset($roomData['name']) ? (string) $roomData['name'] : null;
+                    break;
+                }
+            }
+        }
 
         if (!is_string($roomId) || $roomId === '') {
             return response()->json(['ok' => false, 'message' => 'Room not found for room_number'], 404);
@@ -74,6 +90,7 @@ class DeviceNotificationController extends Controller
             $payload = [
                 'room_number' => $roomNumber,
                 'room_id' => $roomId,
+                'room_name' => $roomName,
                 'temperature' => $temperature,
                 'gas' => $gas,
                 'level' => $type,

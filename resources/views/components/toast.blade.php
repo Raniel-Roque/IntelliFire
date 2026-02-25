@@ -22,15 +22,20 @@
              
              // Listen for dynamic toasts from Livewire
              window.addEventListener('showToast', (event) => {
-                 this.showToast(event.detail.message, event.detail.type);
+                 this.showToast(event.detail.message, event.detail.type, event.detail.persistent);
              });
          },
-         showToast(message, type = 'info') {
+         showToast(message, type = 'info', persistent = false) {
              const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-             this.toasts.push({ message, type, id });
-             setTimeout(() => {
-                 this.toasts = this.toasts.filter(t => t.id !== id);
-             }, 5000);
+
+             const toast = { message, type, id, persistent: !!persistent };
+             this.toasts.push(toast);
+
+             if (!toast.persistent) {
+                 setTimeout(() => {
+                     this.toasts = this.toasts.filter(t => t.id !== id);
+                 }, 5000);
+             }
          }
      }" 
      class="fixed top-4 right-4 z-50 space-y-2">
@@ -74,7 +79,7 @@
             </div>
             
             <!-- Message -->
-            <span class="flex-1" x-text="toast.message"></span>
+            <span class="flex-1 whitespace-pre-line" x-text="toast.message"></span>
             
             <!-- Close button -->
             <button @click="toasts = toasts.filter(t => t.id !== toast.id)" 
