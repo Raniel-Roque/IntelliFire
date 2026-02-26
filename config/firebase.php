@@ -2,6 +2,31 @@
 
 declare(strict_types=1);
 
+$credentialsJsonBase64 = env('FIREBASE_CREDENTIALS_JSON_BASE64');
+$credentialsJson = env('FIREBASE_CREDENTIALS_JSON');
+
+if (is_string($credentialsJsonBase64) && $credentialsJsonBase64 !== '') {
+    $decoded = base64_decode($credentialsJsonBase64, true);
+    if (is_string($decoded) && $decoded !== '') {
+        $credentialsJson = $decoded;
+    }
+}
+
+$credentials = env('FIREBASE_CREDENTIALS')
+    ?: ($credentialsJson ? json_decode($credentialsJson, true) : env('GOOGLE_APPLICATION_CREDENTIALS'));
+
+if (is_string($credentials) && $credentials !== '') {
+    $isWindowsAbsolutePath = (bool) preg_match('/^[A-Za-z]:\\\\/', $credentials);
+    $isUnixAbsolutePath = str_starts_with($credentials, '/');
+
+    if (!$isWindowsAbsolutePath && !$isUnixAbsolutePath) {
+        $candidate = base_path($credentials);
+        if (is_file($candidate)) {
+            $credentials = $candidate;
+        }
+    }
+}
+
 return [
     /*
      * ------------------------------------------------------------------------
@@ -50,7 +75,7 @@ return [
              *
              */
 
-            'credentials' => env('FIREBASE_CREDENTIALS') ?: (env('FIREBASE_CREDENTIALS_JSON') ? json_decode(env('FIREBASE_CREDENTIALS_JSON'), true) : env('GOOGLE_APPLICATION_CREDENTIALS')),
+            'credentials' => $credentials,
 
             /*
              * ------------------------------------------------------------------------
