@@ -50,6 +50,7 @@ function levelStyles(level) {
 function buildCardHtml(item) {
     const level = formatLevel(item.level);
     const styles = levelStyles(item.level);
+    const rawLevel = String(item.level || 'warning').toLowerCase();
 
     const title = item.title || `${level}: ${item.room_name || `Room ${item.room_number ?? '—'}`}`;
 
@@ -61,7 +62,7 @@ function buildCardHtml(item) {
     const roomName = item.room_name || (item.room_number != null ? `Room ${item.room_number}` : '');
 
     return `
-        <button type="button" data-notif-card data-room-name="${escapeHtml(roomName)}" class="text-left w-full rounded-xl border ${styles.border} bg-white dark:bg-gray-800 p-4 shadow-sm transition-transform duration-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
+        <button type="button" data-notif-card data-room-name="${escapeHtml(roomName)}" data-level="${escapeHtml(rawLevel)}" class="text-left w-full rounded-xl border ${styles.border} bg-white dark:bg-gray-800 p-4 shadow-sm transition-transform duration-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
             <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(title)}</p>
@@ -103,6 +104,7 @@ export function initFirebaseNotificationsFeed() {
     const q = query(ref(db, 'emergencies/log'), limitToLast(5));
 
     let lastIds = new Set();
+    let lastLatestId = null;
 
     function normalizeRoomName(roomName) {
         if (!roomName) return null;
@@ -132,6 +134,9 @@ export function initFirebaseNotificationsFeed() {
                 return;
             }
 
+            const level = String(card.getAttribute('data-level') || 'warning').toLowerCase();
+            window.dispatchEvent(new CustomEvent('selected-emergency-level', { detail: { level } }));
+
             scrollToMaps();
             window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { roomName: normalizedRoomName } }));
         });
@@ -157,6 +162,16 @@ export function initFirebaseNotificationsFeed() {
         }
 
         window.dispatchEvent(new CustomEvent('latest-emergency-level', { detail: { level: items[0]?.level || 'warning' } }));
+
+        const latestId = items[0]?.id ?? null;
+        if (latestId && latestId !== lastLatestId) {
+            lastLatestId = latestId;
+            const latestRoomName = normalizeRoomName(items[0]?.room_name || (items[0]?.room_number != null ? `Room ${items[0].room_number}` : null));
+            if (latestRoomName) {
+                window.dispatchEvent(new CustomEvent('clear-selected-emergency-level'));
+                window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { roomName: latestRoomName } }));
+            }
+        }
 
         const incomingIds = new Set(items.map((i) => i.id));
         const newIds = items.filter((i) => !lastIds.has(i.id)).map((i) => i.id);
