@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
 use App\Http\Controllers\RoomsApiController;
+use App\Http\Controllers\NotificationsApiController;
 
 Route::get('/', function () {
     return view('landing');
@@ -10,6 +11,9 @@ Route::get('/', function () {
 
 Route::get('/api/rooms', [RoomsApiController::class, 'index'])
     ->name('api.rooms');
+
+Route::get('/api/notifications/latest', [NotificationsApiController::class, 'latest'])
+    ->name('api.notifications.latest');
 
 Route::view('/login', 'auth.login')->name('login');
 
