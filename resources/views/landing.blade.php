@@ -46,23 +46,23 @@
 
                         <div id="fire-exit-maps-mobile" class="mt-8 lg:hidden scroll-mt-24">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fire Exit Maps</h2>
-                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" x-data="{ selected: '{{ asset('maps/Room 101.png') }}' }" @select-fire-exit-map.window="selected = $event.detail.url">
+                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" x-data="{ selectedRoom: 'Room 101', isUrgent: false, mapsBaseUrl: '{{ url('/maps') }}', mapUrl(room) { const r = encodeURIComponent(String(room || '').trim()); if (!r) return ''; return `${this.mapsBaseUrl}/${r}${this.isUrgent ? '.png' : '_W.jpg'}`; }, get selectedUrl() { return this.mapUrl(this.selectedRoom); } }" @select-fire-exit-map.window="if ($event.detail && $event.detail.roomName) selectedRoom = $event.detail.roomName" @latest-emergency-level.window="isUrgent = ($event.detail && String($event.detail.level || '').toLowerCase() === 'urgent')">
                                 <p class="text-sm text-gray-600 dark:text-gray-300">Choose a map to view the fire exit routes.</p>
 
                                 <div class="mt-4">
-                                    <select x-model="selected" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-                                        <option value="{{ asset('maps/Room 101.png') }}">Room 101</option>
-                                        <option value="{{ asset('maps/Room 102.png') }}">Room 102</option>
-                                        <option value="{{ asset('maps/Room 201.png') }}">Room 201</option>
-                                        <option value="{{ asset('maps/Room 202.png') }}">Room 202</option>
+                                    <select x-model="selectedRoom" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                                        <option value="Room 101">Room 101</option>
+                                        <option value="Room 102">Room 102</option>
+                                        <option value="Room 201">Room 201</option>
+                                        <option value="Room 202">Room 202</option>
                                     </select>
                                 </div>
 
                                 <div class="mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                                    <img :src="selected" alt="Selected fire exit map" class="w-full h-72 object-contain bg-white dark:bg-gray-900" loading="lazy" />
+                                    <img :src="selectedUrl" alt="Selected fire exit map" class="w-full h-72 object-contain bg-white dark:bg-gray-900" loading="lazy" />
                                 </div>
 
-                                <a :href="selected" target="_blank" rel="noopener" class="mt-4 inline-flex w-full items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium">View Map</a>
+                                <a :href="selectedUrl" target="_blank" rel="noopener" class="mt-4 inline-flex w-full items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium">View Map</a>
                             </div>
                         </div>
                     </section>
@@ -70,23 +70,23 @@
                     <aside class="lg:col-span-2 order-2" aria-label="Emergency contacts">
                         <div id="fire-exit-maps-desktop" class="hidden lg:block scroll-mt-24">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fire Exit Maps</h2>
-                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" x-data="{ selected: '{{ asset('maps/Room 101.png') }}' }" @select-fire-exit-map.window="selected = $event.detail.url">
+                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" x-data="{ selectedRoom: 'Room 101', isUrgent: false, mapsBaseUrl: '{{ url('/maps') }}', mapUrl(room) { const r = encodeURIComponent(String(room || '').trim()); if (!r) return ''; return `${this.mapsBaseUrl}/${r}${this.isUrgent ? '.png' : '_W.jpg'}`; }, get selectedUrl() { return this.mapUrl(this.selectedRoom); } }" @select-fire-exit-map.window="if ($event.detail && $event.detail.roomName) selectedRoom = $event.detail.roomName" @latest-emergency-level.window="isUrgent = ($event.detail && String($event.detail.level || '').toLowerCase() === 'urgent')">
                                 <p class="text-sm text-gray-600 dark:text-gray-300">Choose a map to view the fire exit routes.</p>
 
                                 <div class="mt-4">
-                                    <select x-model="selected" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-                                        <option value="{{ asset('maps/Room 101.png') }}">Room 101</option>
-                                        <option value="{{ asset('maps/Room 102.png') }}">Room 102</option>
-                                        <option value="{{ asset('maps/Room 201.png') }}">Room 201</option>
-                                        <option value="{{ asset('maps/Room 202.png') }}">Room 202</option>
+                                    <select x-model="selectedRoom" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                                        <option value="Room 101">Room 101</option>
+                                        <option value="Room 102">Room 102</option>
+                                        <option value="Room 201">Room 201</option>
+                                        <option value="Room 202">Room 202</option>
                                     </select>
                                 </div>
 
                                 <div class="mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                                    <img :src="selected" alt="Selected fire exit map" class="w-full h-80 object-contain bg-white dark:bg-gray-900" loading="lazy" />
+                                    <img :src="selectedUrl" alt="Selected fire exit map" class="w-full h-80 object-contain bg-white dark:bg-gray-900" loading="lazy" />
                                 </div>
 
-                                <a :href="selected" target="_blank" rel="noopener" class="mt-4 inline-flex w-full items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium">View Map</a>
+                                <a :href="selectedUrl" target="_blank" rel="noopener" class="mt-4 inline-flex w-full items-center justify-center px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium">View Map</a>
                             </div>
                         </div>
 

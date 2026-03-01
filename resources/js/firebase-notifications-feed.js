@@ -58,7 +58,7 @@ function buildCardHtml(item) {
     const temp = item.temperature ?? 0;
     const gas = item.gas ?? 0;
 
-    const roomName = item.room_name ?? '';
+    const roomName = item.room_name || (item.room_number != null ? `Room ${item.room_number}` : '');
 
     return `
         <button type="button" data-notif-card data-room-name="${escapeHtml(roomName)}" class="text-left w-full rounded-xl border ${styles.border} bg-white dark:bg-gray-800 p-4 shadow-sm transition-transform duration-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
@@ -104,11 +104,11 @@ export function initFirebaseNotificationsFeed() {
 
     let lastIds = new Set();
 
-    function mapUrlForRoomName(roomName) {
+    function normalizeRoomName(roomName) {
         if (!roomName) return null;
         const safe = String(roomName).trim();
         if (!safe) return null;
-        return new URL(`/maps/${encodeURIComponent(safe)}.png`, window.location.origin).href;
+        return safe;
     }
 
     function scrollToMaps() {
@@ -126,15 +126,14 @@ export function initFirebaseNotificationsFeed() {
             if (!card) return;
 
             const roomName = card.getAttribute('data-room-name');
-            const url = mapUrlForRoomName(roomName);
-            if (!url) {
+            const normalizedRoomName = normalizeRoomName(roomName);
+            if (!normalizedRoomName) {
                 scrollToMaps();
                 return;
             }
 
             scrollToMaps();
-            const decodedUrl = decodeURI(url);
-            window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { url: decodedUrl } }));
+            window.dispatchEvent(new CustomEvent('select-fire-exit-map', { detail: { roomName: normalizedRoomName } }));
         });
     }
 
@@ -152,8 +151,12 @@ export function initFirebaseNotificationsFeed() {
                     <p class="text-sm text-gray-600 dark:text-gray-300">No notifications yet.</p>
                 </div>
             `;
+
+            window.dispatchEvent(new CustomEvent('latest-emergency-level', { detail: { level: 'warning' } }));
             return;
         }
+
+        window.dispatchEvent(new CustomEvent('latest-emergency-level', { detail: { level: items[0]?.level || 'warning' } }));
 
         const incomingIds = new Set(items.map((i) => i.id));
         const newIds = items.filter((i) => !lastIds.has(i.id)).map((i) => i.id);

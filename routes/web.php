@@ -2,10 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
+use App\Http\Controllers\RoomsApiController;
 
 Route::get('/', function () {
     return view('landing');
 });
+
+Route::get('/api/rooms', [RoomsApiController::class, 'index'])
+    ->name('api.rooms');
 
 Route::view('/login', 'auth.login')->name('login');
 
