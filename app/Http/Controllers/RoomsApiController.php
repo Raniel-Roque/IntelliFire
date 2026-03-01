@@ -62,6 +62,6 @@ class RoomsApiController extends Controller
             'ok' => true,
             'count' => count($items),
             'rooms' => $items,
-        ]);
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 }
