@@ -64,11 +64,7 @@ x-cloak>
 
         <div class="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-800">
             <div class="flex items-center flex-1 lg:hidden">
-                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
+                <img src="{{ asset('Logo.jpg') }}" alt="IntelliFire" class="w-8 h-8 rounded-lg object-cover" />
                 <span class="ml-3 text-xl font-bold text-gray-900 dark:text-gray-100">IntelliFire</span>
             </div>
 
@@ -77,11 +73,7 @@ x-cloak>
                  x-transition:enter-start="opacity-0 transform scale-95"
                  x-transition:enter-end="opacity-100 transform scale-100"
                  class="hidden lg:flex items-center flex-1">
-                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
+                <img src="{{ asset('Logo.jpg') }}" alt="IntelliFire" class="w-8 h-8 rounded-lg object-cover" />
                 <span class="ml-3 text-xl font-bold text-gray-900 dark:text-gray-100">IntelliFire</span>
             </div>
 
