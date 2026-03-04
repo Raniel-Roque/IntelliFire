@@ -56,7 +56,7 @@ function buildCardHtml(item) {
 
     const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : '';
 
-    const temp = item.temperature ?? 0;
+    const flame = Boolean(item.flame);
     const gas = item.gas ?? 0;
 
     const roomName = item.room_name || (item.room_number != null ? `Room ${item.room_number}` : '');
@@ -72,8 +72,8 @@ function buildCardHtml(item) {
             </div>
             <div class="mt-3 grid grid-cols-2 gap-3">
                 <div class="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
-                    <p class="text-xs text-gray-600 dark:text-gray-300">Temp</p>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(temp)} <span class="text-xs font-medium text-gray-500 dark:text-gray-400">°C</span></p>
+                    <p class="text-xs text-gray-600 dark:text-gray-300">Flame</p>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${escapeHtml(flame ? 'YES' : 'NO')}</p>
                 </div>
                 <div class="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                     <p class="text-xs text-gray-600 dark:text-gray-300">Gas</p>

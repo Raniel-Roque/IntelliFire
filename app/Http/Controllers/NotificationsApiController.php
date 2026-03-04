@@ -27,8 +27,24 @@ class NotificationsApiController extends Controller
                     $roomName = $roomNumber !== null ? ('Room '.$roomNumber) : '—';
                 }
 
+                $flame = $data['flame'] ?? false;
                 $temperature = $data['temperature'] ?? 0;
                 $gas = $data['gas'] ?? 0;
+
+                if (is_string($flame)) {
+                    $f = strtolower(trim($flame));
+                    if (in_array($f, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                        $flame = true;
+                    } elseif (in_array($f, ['0', 'false', 'no', 'n', 'off'], true)) {
+                        $flame = false;
+                    }
+                }
+                if (is_numeric($flame)) {
+                    $flame = ((int) $flame) === 1;
+                }
+                if (!is_bool($flame)) {
+                    $flame = false;
+                }
 
                 if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
                 if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
@@ -55,6 +71,7 @@ class NotificationsApiController extends Controller
                     'created_at' => (string) ($data['created_at'] ?? ''),
                     'room_name' => $roomName,
                     'room_number' => $data['room_number'] ?? null,
+                    'flame' => $flame,
                     'temperature' => $temperature,
                     'gas' => $gas,
                     'level' => $level,

@@ -26,8 +26,24 @@ class RoomsApiController extends Controller
 
                 $name = isset($room['name']) ? (string) $room['name'] : null;
 
+                $flame = $room['flame'] ?? false;
                 $temperature = $room['temperature'] ?? 0;
                 $gas = $room['gas'] ?? 0;
+
+                if (is_string($flame)) {
+                    $f = strtolower(trim($flame));
+                    if (in_array($f, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                        $flame = true;
+                    } elseif (in_array($f, ['0', 'false', 'no', 'n', 'off'], true)) {
+                        $flame = false;
+                    }
+                }
+                if (is_numeric($flame)) {
+                    $flame = ((int) $flame) === 1;
+                }
+                if (!is_bool($flame)) {
+                    $flame = false;
+                }
 
                 if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
                 if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
@@ -42,6 +58,7 @@ class RoomsApiController extends Controller
                     'id' => (string) $id,
                     'room_number' => $roomNumber,
                     'room_name' => $name ?: ($roomNumber !== null ? ('Room '.$roomNumber) : null),
+                    'flame' => $flame,
                     'temp' => $temperature,
                     'gas' => $gas,
                     'status' => $status,

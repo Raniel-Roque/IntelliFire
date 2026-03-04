@@ -133,8 +133,24 @@ class Display extends Component
         foreach ($raw as $id => $data) {
             if (!is_array($data)) continue;
 
+            $flame = $data['flame'] ?? false;
             $temperature = $data['temperature'] ?? 0;
             $gas = $data['gas'] ?? 0;
+
+            if (is_string($flame)) {
+                $f = strtolower(trim($flame));
+                if (in_array($f, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                    $flame = true;
+                } elseif (in_array($f, ['0', 'false', 'no', 'n', 'off'], true)) {
+                    $flame = false;
+                }
+            }
+            if (is_numeric($flame)) {
+                $flame = ((int) $flame) === 1;
+            }
+            if (!is_bool($flame)) {
+                $flame = false;
+            }
 
             if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') {
                 $temperature = 0;
@@ -147,6 +163,7 @@ class Display extends Component
                 'id' => $id,
                 'name' => $data['name'] ?? '',
                 'room_number' => $data['room_number'] ?? null,
+                'flame' => $flame,
                 'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
                 'gas' => is_numeric($gas) ? (float) $gas : 0,
                 'created_at' => $data['created_at'] ?? '',
@@ -200,8 +217,9 @@ class Display extends Component
         }
 
         // Sort
-        $numericFields = ['room_number', 'temperature', 'gas'];
-        usort($rooms, function ($a, $b) use ($numericFields) {
+        $numericFields = ['room_number', 'gas'];
+        $booleanFields = ['flame'];
+        usort($rooms, function ($a, $b) use ($numericFields, $booleanFields) {
             $av = $a[$this->sortField] ?? '';
             $bv = $b[$this->sortField] ?? '';
 
@@ -209,6 +227,10 @@ class Display extends Component
                 $av = is_numeric($av) ? (float) $av : 0;
                 $bv = is_numeric($bv) ? (float) $bv : 0;
                 $cmp = $av <=> $bv;
+            } elseif (in_array($this->sortField, $booleanFields, true)) {
+                $av = (bool) $av;
+                $bv = (bool) $bv;
+                $cmp = ((int) $av) <=> ((int) $bv);
             } else {
                 $cmp = strcasecmp((string) $av, (string) $bv);
             }

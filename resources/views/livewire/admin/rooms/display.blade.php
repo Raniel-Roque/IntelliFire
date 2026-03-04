@@ -151,10 +151,10 @@
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Status</p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('temperature')">
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('flame')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
-                                Temperature (°C)
-                                @if ($sortField === 'temperature')
+                                Flame
+                                @if ($sortField === 'flame')
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         @if ($sortDirection === 'asc')
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -203,7 +203,7 @@
                                 @endif
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $room['temperature'] ?? 0 }}</p>
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ ($room['flame'] ?? false) ? 'YES' : 'NO' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $room['gas'] ?? 0 }}</p>
@@ -264,8 +264,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14.5a2 2 0 104 0V5a2 2 0 10-4 0v9.5z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 114 0v9.5a4 4 0 11-4 0V5z" />
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Temp:</span>
-                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ $room['temperature'] ?? 0 }}<span class="text-xs font-medium text-gray-500 dark:text-gray-400"> °C</span></span>
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Flame:</span>
+                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ ($room['flame'] ?? false) ? 'YES' : 'NO' }}</span>
                                 </div>
                                 <div class="w-full flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                                     <svg class="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

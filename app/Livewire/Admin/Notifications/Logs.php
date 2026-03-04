@@ -107,7 +107,7 @@ class Logs extends Component
 
     public function sortBy($field): void
     {
-        $allowed = ['created_at', 'room_name', 'gas', 'temperature', 'status'];
+        $allowed = ['created_at', 'room_name', 'gas', 'flame', 'status'];
         if (!in_array($field, $allowed, true)) return;
 
         if ($this->sortField === $field) {
@@ -130,8 +130,24 @@ class Logs extends Component
             $roomName = $roomNumber !== null ? ('Room '.$roomNumber) : '—';
         }
 
+        $flame = $data['flame'] ?? false;
         $temperature = $data['temperature'] ?? 0;
         $gas = $data['gas'] ?? 0;
+
+        if (is_string($flame)) {
+            $f = strtolower(trim($flame));
+            if (in_array($f, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                $flame = true;
+            } elseif (in_array($f, ['0', 'false', 'no', 'n', 'off'], true)) {
+                $flame = false;
+            }
+        }
+        if (is_numeric($flame)) {
+            $flame = ((int) $flame) === 1;
+        }
+        if (!is_bool($flame)) {
+            $flame = false;
+        }
 
         if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
         if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
@@ -154,6 +170,7 @@ class Logs extends Component
             'id' => $id,
             'created_at' => (string) ($data['created_at'] ?? ''),
             'room_name' => $roomName,
+            'flame' => $flame,
             'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
             'gas' => is_numeric($gas) ? (float) $gas : 0,
             'status' => $status,
@@ -207,8 +224,9 @@ class Logs extends Component
             });
         }
 
-        $numericFields = ['gas', 'temperature'];
-        usort($items, function ($a, $b) use ($numericFields) {
+        $numericFields = ['gas'];
+        $booleanFields = ['flame'];
+        usort($items, function ($a, $b) use ($numericFields, $booleanFields) {
             $av = $a[$this->sortField] ?? '';
             $bv = $b[$this->sortField] ?? '';
 
@@ -216,6 +234,10 @@ class Logs extends Component
                 $av = is_numeric($av) ? (float) $av : 0;
                 $bv = is_numeric($bv) ? (float) $bv : 0;
                 $cmp = $av <=> $bv;
+            } elseif (in_array($this->sortField, $booleanFields, true)) {
+                $av = (bool) $av;
+                $bv = (bool) $bv;
+                $cmp = ((int) $av) <=> ((int) $bv);
             } else {
                 $cmp = strcasecmp((string) $av, (string) $bv);
             }

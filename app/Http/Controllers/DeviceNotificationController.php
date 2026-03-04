@@ -18,6 +18,7 @@ class DeviceNotificationController extends Controller
 
         $data = $request->validate([
             'room_number' => ['required'],
+            'flame' => ['nullable'],
             'temp' => ['nullable'],
             'gas' => ['nullable'],
             'type' => ['nullable', 'string'],
@@ -58,8 +59,24 @@ class DeviceNotificationController extends Controller
             return response()->json(['ok' => false, 'message' => 'Room not found for room_number'], 404);
         }
 
+        $flame = $data['flame'] ?? null;
         $temperature = $data['temp'] ?? 0;
         $gas = $data['gas'] ?? 0;
+
+        if (is_string($flame)) {
+            $f = strtolower(trim($flame));
+            if (in_array($f, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                $flame = true;
+            } elseif (in_array($f, ['0', 'false', 'no', 'n', 'off'], true)) {
+                $flame = false;
+            }
+        }
+        if (is_numeric($flame)) {
+            $flame = ((int) $flame) === 1;
+        }
+        if (!is_bool($flame)) {
+            $flame = false;
+        }
 
         if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') {
             $temperature = 0;
@@ -74,6 +91,7 @@ class DeviceNotificationController extends Controller
         $nowIso = now()->toISOString();
 
         $roomUpdate = [
+            'flame' => $flame,
             'temperature' => $temperature,
             'gas' => $gas,
             'updated_at' => $nowIso,
@@ -102,22 +120,19 @@ class DeviceNotificationController extends Controller
             } elseif ($message !== '') {
                 $detail = $message;
             } else {
-                $tempThreshold = (float) config('intellifire.emergency.temp_threshold', 60);
                 $gasThreshold = (float) config('intellifire.emergency.gas_threshold', 1);
-
-                $highTemp = $temperature >= $tempThreshold;
                 $highGas = $gas >= $gasThreshold;
 
                 $isWarning = $type === 'warning';
 
-                if ($highTemp && $highGas) {
+                if ($flame && $highGas) {
                     $detail = $isWarning
-                        ? 'Elevated Temperature and Gas Levels Detected'
-                        : 'High Temperatures and Gas Levels Found';
-                } elseif ($highTemp) {
+                        ? 'Flame and Elevated Gas Levels Detected'
+                        : 'Flame and High Gas Levels Found';
+                } elseif ($flame) {
                     $detail = $isWarning
-                        ? 'Elevated Temperature Detected'
-                        : 'High Temperatures Found';
+                        ? 'Flame Detected'
+                        : 'Fire Detected';
                 } elseif ($highGas) {
                     $detail = $isWarning
                         ? 'Elevated Gas Level Detected'
@@ -136,6 +151,7 @@ class DeviceNotificationController extends Controller
                 'title' => $levelLabel.': '.$detail.' in '.$roomLabel,
                 'reason' => $reason !== '' ? $reason : null,
                 'message' => $message !== '' ? $message : null,
+                'flame' => $flame,
                 'temperature' => $temperature,
                 'gas' => $gas,
                 'level' => $type,

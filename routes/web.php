@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
 use App\Http\Controllers\RoomsApiController;
 use App\Http\Controllers\NotificationsApiController;
+use App\Http\Controllers\Auth\FirebaseSessionController;
 
 Route::get('/', function () {
     return view('landing');
@@ -17,10 +18,10 @@ Route::get('/api/notifications/latest', [NotificationsApiController::class, 'lat
 
 Route::view('/login', 'auth.login')->name('login');
 
-Route::post('/auth/firebase/session', [\App\Http\Controllers\Auth\FirebaseSessionController::class, 'store'])
+Route::post('/auth/firebase/session', [FirebaseSessionController::class, 'store'])
     ->name('auth.firebase.session');
 
-Route::post('/logout', [\App\Http\Controllers\Auth\FirebaseSessionController::class, 'destroy'])
+Route::post('/logout', [FirebaseSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
