@@ -88,6 +88,14 @@ export function initFirebaseNotificationsFeed() {
     const container = document.querySelector('[data-firebase-notifications-feed]');
     if (!container) return;
 
+    const maxAgeMinutesRaw = container.getAttribute('data-max-age-minutes');
+    const maxAgeMinutes = maxAgeMinutesRaw != null && String(maxAgeMinutesRaw).trim() !== ''
+        ? Number(maxAgeMinutesRaw)
+        : 60;
+    const maxAgeMs = Number.isFinite(maxAgeMinutes) && maxAgeMinutes > 0
+        ? maxAgeMinutes * 60 * 1000
+        : 60 * 60 * 1000;
+
     const statusEl = document.getElementById('landing-notifs-status');
 
     const config = getFirebaseConfig();
@@ -144,16 +152,23 @@ export function initFirebaseNotificationsFeed() {
 
     onValue(q, (snapshot) => {
         const raw = snapshot.val() || {};
+        const now = Date.now();
+
         const items = Object.entries(raw)
             .filter(([, v]) => v && typeof v === 'object')
             .map(([id, v]) => ({ id, ...v }))
             .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+            .filter((i) => {
+                const ts = i.created_at ? Date.parse(String(i.created_at)) : NaN;
+                if (!Number.isFinite(ts)) return false;
+                return (now - ts) <= maxAgeMs;
+            })
             .slice(0, 5);
 
         if (!items.length) {
             container.innerHTML = `
                 <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-300">No notifications yet.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">No recent notifications.</p>
                 </div>
             `;
 
