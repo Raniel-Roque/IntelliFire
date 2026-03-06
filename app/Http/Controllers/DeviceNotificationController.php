@@ -82,7 +82,7 @@ class DeviceNotificationController extends Controller
 
         $gas = is_numeric($gas) ? (float) $gas : 0;
 
-        $nowIso = now()->toISOString();
+        $nowIso = now()->toIso8601String();
 
         $roomUpdate = [
             'flame' => $flame,

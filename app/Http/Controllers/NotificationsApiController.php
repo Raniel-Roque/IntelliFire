@@ -39,7 +39,7 @@ class NotificationsApiController extends Controller
                 $createdAtRaw = (string) ($data['created_at'] ?? '');
                 if ($title !== null && $createdAtRaw !== '') {
                     try {
-                        $dt = Carbon::parse($createdAtRaw);
+                        $dt = Carbon::parse($createdAtRaw)->timezone('Asia/Manila');
                         $title = $title.' | '.$dt->format('F j, Y').' | '.$dt->format('g:ia');
                     } catch (\Exception $e) {
                         // keep original title
