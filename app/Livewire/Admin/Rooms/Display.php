@@ -134,7 +134,6 @@ class Display extends Component
             if (!is_array($data)) continue;
 
             $flame = $data['flame'] ?? false;
-            $temperature = $data['temperature'] ?? 0;
             $gas = $data['gas'] ?? 0;
 
             if (is_string($flame)) {
@@ -152,9 +151,6 @@ class Display extends Component
                 $flame = false;
             }
 
-            if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') {
-                $temperature = 0;
-            }
             if (is_string($gas) && strtolower(trim($gas)) === 'n/a') {
                 $gas = 0;
             }
@@ -164,7 +160,6 @@ class Display extends Component
                 'name' => $data['name'] ?? '',
                 'room_number' => $data['room_number'] ?? null,
                 'flame' => $flame,
-                'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
                 'gas' => is_numeric($gas) ? (float) $gas : 0,
                 'created_at' => $data['created_at'] ?? '',
                 'emergency_level' => $data['emergency_level'] ?? null,

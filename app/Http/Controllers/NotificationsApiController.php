@@ -28,7 +28,6 @@ class NotificationsApiController extends Controller
                 }
 
                 $flame = $data['flame'] ?? false;
-                $temperature = $data['temperature'] ?? 0;
                 $gas = $data['gas'] ?? 0;
 
                 if (is_string($flame)) {
@@ -46,10 +45,8 @@ class NotificationsApiController extends Controller
                     $flame = false;
                 }
 
-                if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
                 if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
 
-                $temperature = is_numeric($temperature) ? (float) $temperature : 0;
                 $gas = is_numeric($gas) ? (float) $gas : 0;
 
                 $description = (string) ($data['reason'] ?? '');
@@ -72,7 +69,6 @@ class NotificationsApiController extends Controller
                     'room_name' => $roomName,
                     'room_number' => $data['room_number'] ?? null,
                     'flame' => $flame,
-                    'temperature' => $temperature,
                     'gas' => $gas,
                     'level' => $level,
                     'status' => $status,

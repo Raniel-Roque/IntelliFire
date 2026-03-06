@@ -27,7 +27,6 @@ class RoomsApiController extends Controller
                 $name = isset($room['name']) ? (string) $room['name'] : null;
 
                 $flame = $room['flame'] ?? false;
-                $temperature = $room['temperature'] ?? 0;
                 $gas = $room['gas'] ?? 0;
 
                 if (is_string($flame)) {
@@ -45,10 +44,8 @@ class RoomsApiController extends Controller
                     $flame = false;
                 }
 
-                if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
                 if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
 
-                $temperature = is_numeric($temperature) ? (float) $temperature : 0;
                 $gas = is_numeric($gas) ? (float) $gas : 0;
 
                 $level = strtolower((string) ($room['emergency_level'] ?? ''));
@@ -59,7 +56,6 @@ class RoomsApiController extends Controller
                     'room_number' => $roomNumber,
                     'room_name' => $name ?: ($roomNumber !== null ? ('Room '.$roomNumber) : null),
                     'flame' => $flame,
-                    'temp' => $temperature,
                     'gas' => $gas,
                     'status' => $status,
                 ];

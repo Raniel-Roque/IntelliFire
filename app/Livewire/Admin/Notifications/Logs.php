@@ -131,7 +131,6 @@ class Logs extends Component
         }
 
         $flame = $data['flame'] ?? false;
-        $temperature = $data['temperature'] ?? 0;
         $gas = $data['gas'] ?? 0;
 
         if (is_string($flame)) {
@@ -149,7 +148,6 @@ class Logs extends Component
             $flame = false;
         }
 
-        if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') $temperature = 0;
         if (is_string($gas) && strtolower(trim($gas)) === 'n/a') $gas = 0;
 
         $description = (string) ($data['reason'] ?? '');
@@ -171,7 +169,6 @@ class Logs extends Component
             'created_at' => (string) ($data['created_at'] ?? ''),
             'room_name' => $roomName,
             'flame' => $flame,
-            'temperature' => is_numeric($temperature) ? (float) $temperature : 0,
             'gas' => is_numeric($gas) ? (float) $gas : 0,
             'status' => $status,
             'description' => $description,

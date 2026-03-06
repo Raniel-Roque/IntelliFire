@@ -23,6 +23,14 @@ export function initFirebaseEmergencyListener() {
     const root = document.querySelector('[data-firebase-emergency-listener]');
     if (!root) return;
 
+    const maxAgeMinutesRaw = root.getAttribute('data-max-age-minutes');
+    const maxAgeMinutes = maxAgeMinutesRaw != null && String(maxAgeMinutesRaw).trim() !== ''
+        ? Number(maxAgeMinutesRaw)
+        : 60;
+    const maxAgeMs = Number.isFinite(maxAgeMinutes) && maxAgeMinutes > 0
+        ? maxAgeMinutes * 60 * 1000
+        : 60 * 60 * 1000;
+
     const config = getFirebaseConfig();
     if (!config) return;
 
@@ -35,7 +43,7 @@ export function initFirebaseEmergencyListener() {
     let isInitialized = false;
 
     try {
-        lastSeenKey = sessionStorage.getItem('emergencyLastSeenKey');
+        lastSeenKey = localStorage.getItem('emergencyLastSeenKey');
     } catch (e) {
         // ignore
     }
@@ -46,11 +54,15 @@ export function initFirebaseEmergencyListener() {
 
         const key = `${val.created_at ?? ''}|${val.room_number ?? ''}|${val.level ?? ''}`;
 
+        const ts = val.created_at ? Date.parse(String(val.created_at)) : NaN;
+        const now = Date.now();
+        const isRecent = Number.isFinite(ts) && (now - ts) <= maxAgeMs;
+
         if (!isInitialized) {
             isInitialized = true;
             lastSeenKey = key;
             try {
-                sessionStorage.setItem('emergencyLastSeenKey', lastSeenKey);
+                localStorage.setItem('emergencyLastSeenKey', lastSeenKey);
             } catch (e) {
                 // ignore
             }
@@ -60,10 +72,12 @@ export function initFirebaseEmergencyListener() {
         if (key === lastSeenKey) return;
         lastSeenKey = key;
         try {
-            sessionStorage.setItem('emergencyLastSeenKey', lastSeenKey);
+            localStorage.setItem('emergencyLastSeenKey', lastSeenKey);
         } catch (e) {
             // ignore
         }
+
+        if (!isRecent) return;
 
         const level = String(val.level || 'warning');
         const roomName = val.room_name ?? null;

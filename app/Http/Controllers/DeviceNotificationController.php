@@ -19,7 +19,6 @@ class DeviceNotificationController extends Controller
         $data = $request->validate([
             'room_number' => ['required'],
             'flame' => ['nullable'],
-            'temp' => ['nullable'],
             'gas' => ['nullable'],
             'type' => ['nullable', 'string'],
             'timestamp' => ['nullable'],
@@ -60,7 +59,6 @@ class DeviceNotificationController extends Controller
         }
 
         $flame = $data['flame'] ?? null;
-        $temperature = $data['temp'] ?? 0;
         $gas = $data['gas'] ?? 0;
 
         if (is_string($flame)) {
@@ -78,21 +76,16 @@ class DeviceNotificationController extends Controller
             $flame = false;
         }
 
-        if (is_string($temperature) && strtolower(trim($temperature)) === 'n/a') {
-            $temperature = 0;
-        }
         if (is_string($gas) && strtolower(trim($gas)) === 'n/a') {
             $gas = 0;
         }
 
-        $temperature = is_numeric($temperature) ? (float) $temperature : 0;
         $gas = is_numeric($gas) ? (float) $gas : 0;
 
         $nowIso = now()->toISOString();
 
         $roomUpdate = [
             'flame' => $flame,
-            'temperature' => $temperature,
             'gas' => $gas,
             'updated_at' => $nowIso,
         ];
@@ -152,7 +145,6 @@ class DeviceNotificationController extends Controller
                 'reason' => $reason !== '' ? $reason : null,
                 'message' => $message !== '' ? $message : null,
                 'flame' => $flame,
-                'temperature' => $temperature,
                 'gas' => $gas,
                 'level' => $type,
                 'created_at' => $nowIso,
