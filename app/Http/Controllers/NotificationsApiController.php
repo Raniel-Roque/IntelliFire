@@ -35,6 +35,9 @@ class NotificationsApiController extends Controller
                     $rawTitle = null;
                 }
 
+                $level = strtolower((string) ($data['level'] ?? ''));
+                $icon = $level === 'urgent' ? '🔴 ' : ($level === 'warning' ? '🟡 ' : '');
+
                 $title = $rawTitle;
                 $createdAtRaw = (string) ($data['created_at'] ?? '');
                 if ($title !== null && $createdAtRaw !== '') {
@@ -44,6 +47,10 @@ class NotificationsApiController extends Controller
                     } catch (\Exception $e) {
                         // keep original title
                     }
+                }
+
+                if ($title !== null && $icon !== '') {
+                    $title = $icon.$title;
                 }
 
                 $items[] = [
