@@ -5,6 +5,7 @@ use App\Http\Controllers\DeviceNotificationController;
 use App\Http\Controllers\RoomsApiController;
 use App\Http\Controllers\NotificationsApiController;
 use App\Http\Controllers\Auth\FirebaseSessionController;
+use App\Http\Controllers\Auth\RoomUserSessionController;
 
 Route::get('/', function () {
     return view('landing');
@@ -21,21 +22,28 @@ Route::view('/login', 'auth.login')->name('login');
 Route::post('/auth/firebase/session', [FirebaseSessionController::class, 'store'])
     ->name('auth.firebase.session');
 
+Route::post('/auth/room/session', [RoomUserSessionController::class, 'store'])
+    ->name('auth.room.session');
+
 Route::post('/logout', [FirebaseSessionController::class, 'destroy'])
-    ->middleware('auth')
+    ->middleware('auth:web,room')
     ->name('logout');
 
 Route::view('/dashboard', 'admin.dashboard')
-    ->middleware('auth')
+    ->middleware('auth:web')
     ->name('dashboard');
 
 Route::view('/change-password', 'auth.change-password')
-    ->middleware('auth')
+    ->middleware('auth:web')
     ->name('change-password');
 
 Route::view('/rooms', 'admin.rooms')
-    ->middleware('auth')
+    ->middleware('auth:web')
     ->name('rooms');
+
+Route::view('/user-home', 'user.home')
+    ->middleware('auth:room')
+    ->name('user.home');
 
 Route::match(['get', 'post'], '/debug/firebase', function () {
     $b64 = env('FIREBASE_CREDENTIALS_JSON_BASE64');

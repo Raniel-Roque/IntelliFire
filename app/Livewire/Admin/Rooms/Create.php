@@ -33,8 +33,10 @@ class Create extends Component
         $this->validate();
 
         try {
+            $database = app(Database::class);
+
             // Determine next room_number
-            $snapshot = app(Database::class)->getReference('rooms')->getSnapshot();
+            $snapshot = $database->getReference('rooms')->getSnapshot();
             $raw = $snapshot->getValue() ?? [];
             $maxRoomNumber = 0;
             foreach ($raw as $data) {
@@ -44,13 +46,24 @@ class Create extends Component
             }
             $nextRoomNumber = $maxRoomNumber + 1;
 
-            $newRef = app(Database::class)->getReference('rooms')->push([
-                'name' => trim($this->name),
+            $roomName = trim($this->name);
+
+            $newRef = $database->getReference('rooms')->push([
+                'name' => $roomName,
                 'room_number' => $nextRoomNumber,
                 'created_at' => now()->toISOString(),
             ]);
 
-            $roomName = $this->name;
+            $roomId = $newRef->getKey();
+            if (is_string($roomId) && $roomId !== '') {
+                $database->getReference('room_users/'.$roomId)->set([
+                    'username' => $roomName,
+                    'password' => 'password',
+                    'room_id' => $roomId,
+                    'created_at' => now()->toISOString(),
+                ]);
+            }
+
             $this->closeModal();
             $this->dispatch('refreshRooms');
             $this->dispatch('showToast', message: "{$roomName} has been successfully added!", type: 'success');

@@ -43,7 +43,8 @@ class FirebaseSessionController extends Controller
 
     public function destroy(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
+        Auth::guard('room')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

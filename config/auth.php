@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'room' => [
+            'driver' => 'session',
+            'provider' => 'room_users',
+        ],
     ],
 
     /*
@@ -62,6 +66,10 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'firebase',
+        ],
+
+        'room_users' => [
+            'driver' => 'room',
         ],
 
         // 'users' => [
