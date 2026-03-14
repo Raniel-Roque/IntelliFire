@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
 use App\Http\Controllers\DeviceDoorStatusController;
 use App\Http\Controllers\DeviceMotionController;
+use App\Http\Controllers\AppDoorStatusController;
+use App\Http\Controllers\AppResponseController;
 use App\Http\Controllers\RoomsApiController;
 use App\Http\Controllers\NotificationsApiController;
 use App\Http\Controllers\Auth\FirebaseSessionController;
@@ -75,3 +77,9 @@ Route::post('/device/door-status', [DeviceDoorStatusController::class, 'store'])
 
 Route::post('/device/motion', [DeviceMotionController::class, 'store'])
     ->name('device.motion');
+
+Route::post('/app/door-status', [AppDoorStatusController::class, 'store'])
+    ->name('app.door_status');
+
+Route::post('/app/response', [AppResponseController::class, 'store'])
+    ->name('app.response');

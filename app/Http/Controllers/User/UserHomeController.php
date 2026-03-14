@@ -33,9 +33,16 @@ class UserHomeController extends Controller
             }
         }
 
+        $isUrgent = false;
+        if (is_array($room) && isset($room['emergency_level'])) {
+            $lvl = strtolower(trim((string) $room['emergency_level']));
+            $isUrgent = $lvl === 'urgent';
+        }
+
         return view('user.home', [
             'doorStatus' => $doorStatus,
             'response' => $response,
+            'isUrgent' => $isUrgent,
         ]);
     }
 
