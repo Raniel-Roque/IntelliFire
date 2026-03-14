@@ -33,16 +33,24 @@ class UserHomeController extends Controller
             }
         }
 
-        $isUrgent = false;
-        if (is_array($room) && isset($room['emergency_level'])) {
-            $lvl = strtolower(trim((string) $room['emergency_level']));
-            $isUrgent = $lvl === 'urgent';
+        $anyUrgent = false;
+        $roomsSnapshot = $database->getReference('rooms')->getSnapshot();
+        $roomsRaw = $roomsSnapshot->getValue() ?? [];
+        if (is_array($roomsRaw) && $roomsRaw !== []) {
+            foreach ($roomsRaw as $roomData) {
+                if (!is_array($roomData) || !isset($roomData['emergency_level'])) continue;
+                $lvl = strtolower(trim((string) $roomData['emergency_level']));
+                if ($lvl === 'urgent') {
+                    $anyUrgent = true;
+                    break;
+                }
+            }
         }
 
         return view('user.home', [
             'doorStatus' => $doorStatus,
             'response' => $response,
-            'isUrgent' => $isUrgent,
+            'isUrgent' => $anyUrgent,
         ]);
     }
 
