@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
+use App\Http\Controllers\DeviceDoorStatusController;
+use App\Http\Controllers\DeviceMotionController;
 use App\Http\Controllers\RoomsApiController;
 use App\Http\Controllers\NotificationsApiController;
 use App\Http\Controllers\Auth\FirebaseSessionController;
 use App\Http\Controllers\Auth\RoomUserSessionController;
+use App\Http\Controllers\User\UserHomeController;
 
 Route::get('/', function () {
     return view('landing');
@@ -41,9 +44,17 @@ Route::view('/rooms', 'admin.rooms')
     ->middleware('auth:web')
     ->name('rooms');
 
-Route::view('/user-home', 'user.home')
+Route::get('/user-home', [UserHomeController::class, 'show'])
     ->middleware('auth:room')
     ->name('user.home');
+
+Route::post('/user/door-toggle', [UserHomeController::class, 'toggleDoor'])
+    ->middleware('auth:room')
+    ->name('user.door.toggle');
+
+Route::post('/user/response', [UserHomeController::class, 'setResponse'])
+    ->middleware('auth:room')
+    ->name('user.response');
 
 Route::match(['get', 'post'], '/debug/firebase', function () {
     $b64 = env('FIREBASE_CREDENTIALS_JSON_BASE64');
@@ -58,3 +69,9 @@ Route::match(['get', 'post'], '/debug/firebase', function () {
 
 Route::post('/device/notify', [DeviceNotificationController::class, 'store'])
     ->name('device.notify');
+
+Route::post('/device/door-status', [DeviceDoorStatusController::class, 'store'])
+    ->name('device.door_status');
+
+Route::post('/device/motion', [DeviceMotionController::class, 'store'])
+    ->name('device.motion');

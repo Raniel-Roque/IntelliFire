@@ -124,6 +124,41 @@ class Display extends Component
         $this->page = 1;
     }
 
+    public function toggleDoor(string $roomId): void
+    {
+        $snapshot = app(Database::class)->getReference('rooms/'.$roomId)->getSnapshot();
+        $data = $snapshot->getValue();
+
+        $current = 'closed';
+        if (is_array($data) && isset($data['door_status'])) {
+            $s = strtolower(trim((string) $data['door_status']));
+            if (in_array($s, ['open', 'closed'], true)) {
+                $current = $s;
+            }
+        }
+
+        $next = $current === 'open' ? 'closed' : 'open';
+
+        app(Database::class)->getReference('rooms/'.$roomId)->update([
+            'door_status' => $next,
+            'updated_at' => now()->toISOString(),
+        ]);
+
+        $this->dispatch('showToast', message: 'Door status updated.', type: 'success');
+        $this->dispatch('refreshRooms');
+    }
+
+    public function resetResponse(string $roomId): void
+    {
+        app(Database::class)->getReference('rooms/'.$roomId)->update([
+            'response' => 'no response',
+            'updated_at' => now()->toISOString(),
+        ]);
+
+        $this->dispatch('showToast', message: 'Response reset.', type: 'success');
+        $this->dispatch('refreshRooms');
+    }
+
     protected function getRoomsFromFirebase(): array
     {
         $snapshot = app(Database::class)->getReference('rooms')->getSnapshot();
@@ -155,12 +190,41 @@ class Display extends Component
                 $gas = 0;
             }
 
+            $doorStatus = strtolower(trim((string) ($data['door_status'] ?? 'closed')));
+            if (!in_array($doorStatus, ['open', 'closed'], true)) {
+                $doorStatus = 'closed';
+            }
+
+            $motion = $data['motion'] ?? false;
+            if (is_string($motion)) {
+                $m = strtolower(trim($motion));
+                if (in_array($m, ['1', 'true', 'yes', 'y', 'on'], true)) {
+                    $motion = true;
+                } elseif (in_array($m, ['0', 'false', 'no', 'n', 'off'], true)) {
+                    $motion = false;
+                }
+            }
+            if (is_numeric($motion)) {
+                $motion = ((int) $motion) === 1;
+            }
+            if (!is_bool($motion)) {
+                $motion = false;
+            }
+
+            $response = strtolower(trim((string) ($data['response'] ?? 'no response')));
+            if (!in_array($response, ['yes', 'no', 'no response'], true)) {
+                $response = 'no response';
+            }
+
             $rooms[] = [
                 'id' => $id,
                 'name' => $data['name'] ?? '',
                 'room_number' => $data['room_number'] ?? null,
                 'flame' => $flame,
                 'gas' => is_numeric($gas) ? (float) $gas : 0,
+                'door_status' => $doorStatus,
+                'motion' => $motion,
+                'response' => $response,
                 'created_at' => $data['created_at'] ?? '',
                 'emergency_level' => $data['emergency_level'] ?? null,
                 'last_emergency_at' => $data['last_emergency_at'] ?? null,
@@ -213,7 +277,7 @@ class Display extends Component
 
         // Sort
         $numericFields = ['room_number', 'gas'];
-        $booleanFields = ['flame'];
+        $booleanFields = ['flame', 'motion'];
         usort($rooms, function ($a, $b) use ($numericFields, $booleanFields) {
             $av = $a[$this->sortField] ?? '';
             $bv = $b[$this->sortField] ?? '';

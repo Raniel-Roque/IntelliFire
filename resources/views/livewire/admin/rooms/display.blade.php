@@ -179,6 +179,48 @@
                                 @endif
                             </p>
                         </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('door_status')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                                Door
+                                @if ($sortField === 'door_status')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('motion')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                                Motion
+                                @if ($sortField === 'motion')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </p>
+                        </th>
+                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('response')">
+                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                                Response
+                                @if ($sortField === 'response')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        @if ($sortDirection === 'asc')
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        @endif
+                                    </svg>
+                                @endif
+                            </p>
+                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 text-center">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200">Actions</p>
                         </th>
@@ -209,7 +251,31 @@
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ $room['gas'] ?? 0 }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ (($room['door_status'] ?? 'closed') === 'open') ? 'OPEN' : 'CLOSED' }}</p>
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ ($room['motion'] ?? false) ? 'YES' : 'NO' }}</p>
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
+                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">
+                                    @php $resp = strtolower((string) ($room['response'] ?? 'no response')); @endphp
+                                    {{ $resp === 'yes' ? 'YES' : ($resp === 'no' ? 'NO' : 'NO RESPONSE') }}
+                                </p>
+                            </td>
+                            <td class="p-3 md:p-4 py-4 md:py-5">
                                 <div class="flex gap-1 md:gap-2 justify-center items-center">
+                                    <button
+                                        wire:click="toggleDoor('{{ $room['id'] }}')"
+                                        class="px-3 py-1 text-xs font-medium text-orange-700 bg-orange-50 rounded-md hover:bg-orange-100 transition-colors cursor-pointer"
+                                        title="Toggle Door">
+                                        {{ (($room['door_status'] ?? 'closed') === 'open') ? 'Close Door' : 'Open Door' }}
+                                    </button>
+                                    <button
+                                        wire:click="resetResponse('{{ $room['id'] }}')"
+                                        class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
+                                        title="Reset Response">
+                                        Reset Resp
+                                    </button>
                                     <button
                                         wire:click="$dispatch('openEditModal', '{{ $room['id'] }}')"
                                         class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors cursor-pointer"
@@ -227,7 +293,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="9" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M33.18,26.11,20.35,13.28A9.28,9.28,0,0,0,7.54,2.79l-1.34.59,5.38,5.38L8.76,11.59,3.38,6.21,2.79,7.54A9.27,9.27,0,0,0,13.28,20.35L26.11,33.18a2,2,0,0,0,2.83,0l4.24-4.24A2,2,0,0,0,33.18,26.11Zm-5.66,5.66L13.88,18.12l-.57.16a7.27,7.27,0,0,1-9.31-7,7.2,7.2,0,0,1,.15-1.48l4.61,4.61,5.66-5.66L9.81,4.15a7.27,7.27,0,0,1,8.47,9.16l-.16.57L31.77,27.53Z"></path>
@@ -276,10 +342,38 @@
                                     <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ $room['gas'] ?? 0 }}<span class="text-xs font-medium text-gray-500 dark:text-gray-400"> m<sup>3</sup></span></span>
                                 </div>
                             </div>
+
+                            <div class="grid grid-cols-3 gap-2 pt-2">
+                                <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Door</span>
+                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ (($room['door_status'] ?? 'closed') === 'open') ? 'OPEN' : 'CLOSED' }}</span>
+                                </div>
+                                <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Motion</span>
+                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ ($room['motion'] ?? false) ? 'YES' : 'NO' }}</span>
+                                </div>
+                                <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Resp</span>
+                                    @php $resp = strtolower((string) ($room['response'] ?? 'no response')); @endphp
+                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ $resp === 'yes' ? 'YES' : ($resp === 'no' ? 'NO' : '—') }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="flex justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <button
+                            wire:click="toggleDoor('{{ $room['id'] }}')"
+                            class="px-3 py-1 text-xs font-medium text-orange-700 bg-orange-50 rounded-md hover:bg-orange-100 transition-colors cursor-pointer"
+                            title="Toggle Door">
+                            {{ (($room['door_status'] ?? 'closed') === 'open') ? 'Close Door' : 'Open Door' }}
+                        </button>
+                        <button
+                            wire:click="resetResponse('{{ $room['id'] }}')"
+                            class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
+                            title="Reset Response">
+                            Reset Resp
+                        </button>
                         <button
                             wire:click="$dispatch('openEditModal', '{{ $room['id'] }}')"
                             class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors cursor-pointer"

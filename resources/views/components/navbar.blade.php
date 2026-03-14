@@ -1,11 +1,11 @@
 @props(['includeSidebar' => false, 'user' => null, 'title' => null])
 
 @php
-    $displayName = $user ? (string) ($user->name ?? $user->email ?? '') : '';
+    $displayName = $user ? (string) ($user->username ?? $user->name ?? $user->email ?? '') : '';
     $displayEmail = $user ? (string) ($user->email ?? '') : '';
 @endphp
 
-@auth
+@if(auth()->check() || auth('room')->check())
     @if($includeSidebar && $user)
         <div class="flex h-screen bg-gray-100 dark:bg-gray-900">
             <x-sidebar :user="$user" />
@@ -113,12 +113,14 @@
                                         </div>
 
                                         <div class="border-t border-gray-200">
-                                            <a href="{{ route('change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200">
-                                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                                </svg>
-                                                Change Password
-                                            </a>
+                                            @if(auth('web')->check())
+                                                <a href="{{ route('change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200">
+                                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                                    </svg>
+                                                    Change Password
+                                                </a>
+                                            @endif
                                             <button
                                                 type="button"
                                                 @click="open = false; showLogoutConfirmation = true"
@@ -203,7 +205,9 @@
                             </button>
 
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50" x-cloak>
-                                <a href="{{ route('change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">Change Password</a>
+                                @if(auth('web')->check())
+                                    <a href="{{ route('change-password') }}" class="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">Change Password</a>
+                                @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200" type="submit">Logout</button>
@@ -219,7 +223,7 @@
             {{ $slot }}
         </main>
     @endif
-@endauth
+@endif
 
 @guest
     {{ $slot }}
