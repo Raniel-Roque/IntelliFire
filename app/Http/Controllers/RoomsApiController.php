@@ -48,6 +48,16 @@ class RoomsApiController extends Controller
 
                 $gas = is_numeric($gas) ? (float) $gas : 0;
 
+                $doorStatus = strtolower(trim((string) ($room['door_status'] ?? 'closed')));
+                if (!in_array($doorStatus, ['open', 'closed'], true)) {
+                    $doorStatus = 'closed';
+                }
+
+                $response = strtolower(trim((string) ($room['response'] ?? 'no response')));
+                if (!in_array($response, ['yes', 'no', 'no response'], true)) {
+                    $response = 'no response';
+                }
+
                 $level = strtolower((string) ($room['emergency_level'] ?? ''));
                 $status = $level === 'urgent' ? 'URGENT' : ($level === 'warning' ? 'WARNING' : 'NORMAL');
 
@@ -57,6 +67,8 @@ class RoomsApiController extends Controller
                     'room_name' => $name ?: ($roomNumber !== null ? ('Room '.$roomNumber) : null),
                     'flame' => $flame,
                     'gas' => $gas,
+                    'door_status' => $doorStatus,
+                    'response' => $response,
                     'status' => $status,
                 ];
             }
