@@ -193,20 +193,6 @@
                                 @endif
                             </p>
                         </th>
-                        <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('motion')">
-                            <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
-                                Motion
-                                @if ($sortField === 'motion')
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        @if ($sortDirection === 'asc')
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                                        @else
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        @endif
-                                    </svg>
-                                @endif
-                            </p>
-                        </th>
                         <th class="p-3 md:p-4 border-b border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-600" wire:click="sortBy('response')">
                             <p class="text-xs md:text-sm font-semibold leading-none text-slate-700 dark:text-slate-200 flex items-center gap-1">
                                 Response
@@ -252,9 +238,6 @@
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ (($room['door_status'] ?? 'closed') === 'open') ? 'OPEN' : 'CLOSED' }}</p>
-                            </td>
-                            <td class="p-3 md:p-4 py-4 md:py-5">
-                                <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">{{ ($room['motion'] ?? false) ? 'YES' : 'NO' }}</p>
                             </td>
                             <td class="p-3 md:p-4 py-4 md:py-5">
                                 <p class="block text-xs md:text-sm text-slate-800 dark:text-slate-200">
@@ -343,14 +326,10 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 pt-2">
+                            <div class="grid grid-cols-2 gap-2 pt-2">
                                 <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                                     <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Door</span>
                                     <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ (($room['door_status'] ?? 'closed') === 'open') ? 'OPEN' : 'CLOSED' }}</span>
-                                </div>
-                                <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
-                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Motion</span>
-                                    <span class="text-xs font-semibold text-gray-900 dark:text-white">{{ ($room['motion'] ?? false) ? 'YES' : 'NO' }}</span>
                                 </div>
                                 <div class="w-full flex items-center justify-between gap-2 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2">
                                     <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Resp</span>

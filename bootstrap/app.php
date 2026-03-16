@@ -14,7 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'device/notify',
             'device/door-status',
-            'device/motion',
             'app/door-status',
             'app/response',
         ]);

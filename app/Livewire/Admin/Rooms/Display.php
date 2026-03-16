@@ -203,22 +203,6 @@ class Display extends Component
                 $doorStatus = 'closed';
             }
 
-            $motion = $data['motion'] ?? false;
-            if (is_string($motion)) {
-                $m = strtolower(trim($motion));
-                if (in_array($m, ['1', 'true', 'yes', 'y', 'on'], true)) {
-                    $motion = true;
-                } elseif (in_array($m, ['0', 'false', 'no', 'n', 'off'], true)) {
-                    $motion = false;
-                }
-            }
-            if (is_numeric($motion)) {
-                $motion = ((int) $motion) === 1;
-            }
-            if (!is_bool($motion)) {
-                $motion = false;
-            }
-
             $response = strtolower(trim((string) ($data['response'] ?? 'no response')));
             if (!in_array($response, ['yes', 'no', 'no response'], true)) {
                 $response = 'no response';
@@ -231,7 +215,6 @@ class Display extends Component
                 'flame' => $flame,
                 'gas' => is_numeric($gas) ? (float) $gas : 0,
                 'door_status' => $doorStatus,
-                'motion' => $motion,
                 'response' => $response,
                 'created_at' => $data['created_at'] ?? '',
                 'emergency_level' => $data['emergency_level'] ?? null,
@@ -285,7 +268,7 @@ class Display extends Component
 
         // Sort
         $numericFields = ['room_number', 'gas'];
-        $booleanFields = ['flame', 'motion'];
+        $booleanFields = ['flame'];
         usort($rooms, function ($a, $b) use ($numericFields, $booleanFields) {
             $av = $a[$this->sortField] ?? '';
             $bv = $b[$this->sortField] ?? '';
