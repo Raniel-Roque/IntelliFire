@@ -60,7 +60,7 @@ class AppDoorStatusController extends Controller
         }
 
         $database->getReference('rooms/'.$roomId)->update([
-            'door_status' => $status,
+            'door_command' => $status,
             'updated_at' => now()->toIso8601String(),
         ]);
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeviceNotificationController;
 use App\Http\Controllers\DeviceDoorStatusController;
+use App\Http\Controllers\DeviceDoorCommandController;
 use App\Http\Controllers\DeviceMotionController;
 use App\Http\Controllers\AppDoorStatusController;
 use App\Http\Controllers\AppResponseController;
@@ -74,6 +75,9 @@ Route::post('/device/notify', [DeviceNotificationController::class, 'store'])
 
 Route::post('/device/door-status', [DeviceDoorStatusController::class, 'store'])
     ->name('device.door_status');
+
+Route::get('/device/door-command', [DeviceDoorCommandController::class, 'show'])
+    ->name('device.door_command');
 
 Route::post('/device/motion', [DeviceMotionController::class, 'store'])
     ->name('device.motion');

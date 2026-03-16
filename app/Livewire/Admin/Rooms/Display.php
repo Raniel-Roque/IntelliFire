@@ -130,8 +130,8 @@ class Display extends Component
         $data = $snapshot->getValue();
 
         $current = 'closed';
-        if (is_array($data) && isset($data['door_status'])) {
-            $s = strtolower(trim((string) $data['door_status']));
+        if (is_array($data) && isset($data['door_command'])) {
+            $s = strtolower(trim((string) $data['door_command']));
             if (in_array($s, ['open', 'closed'], true)) {
                 $current = $s;
             }
@@ -140,7 +140,7 @@ class Display extends Component
         $next = $current === 'open' ? 'closed' : 'open';
 
         app(Database::class)->getReference('rooms/'.$roomId)->update([
-            'door_status' => $next,
+            'door_command' => $next,
             'updated_at' => now()->toISOString(),
         ]);
 

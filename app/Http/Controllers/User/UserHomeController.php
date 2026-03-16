@@ -18,7 +18,12 @@ class UserHomeController extends Controller
         $room = $snapshot->getValue();
 
         $doorStatus = 'closed';
-        if (is_array($room) && isset($room['door_status'])) {
+        if (is_array($room) && isset($room['door_command'])) {
+            $s = strtolower(trim((string) $room['door_command']));
+            if (in_array($s, ['open', 'closed'], true)) {
+                $doorStatus = $s;
+            }
+        } elseif (is_array($room) && isset($room['door_status'])) {
             $s = strtolower(trim((string) $room['door_status']));
             if (in_array($s, ['open', 'closed'], true)) {
                 $doorStatus = $s;
@@ -63,8 +68,8 @@ class UserHomeController extends Controller
         $room = $snapshot->getValue();
 
         $current = 'closed';
-        if (is_array($room) && isset($room['door_status'])) {
-            $s = strtolower(trim((string) $room['door_status']));
+        if (is_array($room) && isset($room['door_command'])) {
+            $s = strtolower(trim((string) $room['door_command']));
             if (in_array($s, ['open', 'closed'], true)) {
                 $current = $s;
             }
@@ -73,7 +78,7 @@ class UserHomeController extends Controller
         $next = $current === 'open' ? 'closed' : 'open';
 
         $database->getReference('rooms/'.$roomId)->update([
-            'door_status' => $next,
+            'door_command' => $next,
             'updated_at' => now()->toIso8601String(),
         ]);
 
