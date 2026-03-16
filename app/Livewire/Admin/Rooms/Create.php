@@ -52,7 +52,6 @@ class Create extends Component
                 'name' => $roomName,
                 'room_number' => $nextRoomNumber,
                 'door_status' => 'closed',
-                'door_command' => 'closed',
                 'motion' => false,
                 'response' => 'no response',
                 'created_at' => now()->toISOString(),

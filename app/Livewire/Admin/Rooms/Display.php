@@ -3,7 +3,9 @@
 namespace App\Livewire\Admin\Rooms;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use Kreait\Firebase\Contract\Database;
+use App\Actions\PushRoomUpdateNotification;
 use Carbon\Carbon;
 
 class Display extends Component
@@ -130,8 +132,8 @@ class Display extends Component
         $data = $snapshot->getValue();
 
         $current = 'closed';
-        if (is_array($data) && isset($data['door_command'])) {
-            $s = strtolower(trim((string) $data['door_command']));
+        if (is_array($data) && isset($data['door_status'])) {
+            $s = strtolower(trim((string) $data['door_status']));
             if (in_array($s, ['open', 'closed'], true)) {
                 $current = $s;
             }
@@ -140,9 +142,15 @@ class Display extends Component
         $next = $current === 'open' ? 'closed' : 'open';
 
         app(Database::class)->getReference('rooms/'.$roomId)->update([
-            'door_command' => $next,
+            'door_status' => $next,
             'updated_at' => now()->toISOString(),
         ]);
+
+        $roomNumber = (is_array($data) && isset($data['room_number']) && is_numeric($data['room_number']))
+            ? (int) $data['room_number']
+            : null;
+        $roomName = (is_array($data) && isset($data['name'])) ? (string) $data['name'] : null;
+        PushRoomUpdateNotification::push(app(Database::class), $roomId, $roomNumber, $roomName, $next);
 
         $this->dispatch('showToast', message: 'Door status updated.', type: 'success');
         $this->dispatch('refreshRooms');

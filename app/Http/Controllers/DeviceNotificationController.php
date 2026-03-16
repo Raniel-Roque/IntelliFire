@@ -21,6 +21,8 @@ class DeviceNotificationController extends Controller
             'flame' => ['nullable'],
             'gas' => ['nullable'],
             'type' => ['nullable', 'string'],
+            'door_status' => ['nullable', 'string'],
+            'door_command' => ['nullable', 'string'],
             'timestamp' => ['nullable'],
             'reason' => ['nullable', 'string'],
             'message' => ['nullable', 'string'],
@@ -34,6 +36,7 @@ class DeviceNotificationController extends Controller
 
         $type = strtolower((string) ($data['type'] ?? 'info'));
         $isEmergency = in_array($type, ['warning', 'urgent'], true);
+        $isUpdate = $type === 'update';
 
         $roomId = null;
         $roomName = null;
@@ -100,9 +103,21 @@ class DeviceNotificationController extends Controller
 
         $database->getReference('rooms/'.$roomId)->update($roomUpdate);
 
-        if ($isEmergency) {
+        if ($isEmergency || $isUpdate) {
             $reason = (string) ($data['reason'] ?? '');
             $message = (string) ($data['message'] ?? '');
+
+            $doorStatus = isset($data['door_status']) ? strtolower(trim((string) $data['door_status'])) : null;
+            if ($doorStatus !== null && !in_array($doorStatus, ['open', 'closed'], true)) {
+                $doorStatus = null;
+            }
+
+            if ($doorStatus === null && isset($data['door_command'])) {
+                $fallback = strtolower(trim((string) $data['door_command']));
+                if (in_array($fallback, ['open', 'closed'], true)) {
+                    $doorStatus = $fallback;
+                }
+            }
 
             $roomLabel = $roomName ?: ('Room '.$roomNumber);
             $levelLabel = strtoupper($type);
@@ -112,6 +127,10 @@ class DeviceNotificationController extends Controller
                 $detail = $reason;
             } elseif ($message !== '') {
                 $detail = $message;
+            } elseif ($isUpdate) {
+                $detail = $doorStatus !== null
+                    ? ('Door status set to '.strtoupper($doorStatus))
+                    : 'Update received';
             } else {
                 $gasThreshold = (float) config('intellifire.emergency.gas_threshold', 1);
                 $highGas = $gas >= $gasThreshold;
@@ -147,12 +166,16 @@ class DeviceNotificationController extends Controller
                 'flame' => $flame,
                 'gas' => $gas,
                 'level' => $type,
+                'door_status' => $doorStatus,
                 'created_at' => $nowIso,
                 'timestamp' => $data['timestamp'] ?? null,
             ];
 
-            $database->getReference('emergencies/latest')->set($payload);
             $database->getReference('emergencies/log')->push($payload);
+
+            if ($isEmergency) {
+                $database->getReference('emergencies/latest')->set($payload);
+            }
         }
 
         return response()->json(['ok' => true]);
