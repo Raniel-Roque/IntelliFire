@@ -36,6 +36,9 @@ class NotificationsApiController extends Controller
                 }
 
                 $level = strtolower((string) ($data['level'] ?? ''));
+                if (!in_array($level, ['urgent', 'warning'], true)) {
+                    continue;
+                }
                 $icon = $level === 'urgent' ? '🔴 ' : ($level === 'warning' ? '🟡 ' : '');
 
                 $title = $rawTitle;

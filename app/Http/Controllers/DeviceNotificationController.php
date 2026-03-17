@@ -103,7 +103,7 @@ class DeviceNotificationController extends Controller
 
         $database->getReference('rooms/'.$roomId)->update($roomUpdate);
 
-        if ($isEmergency || $isUpdate) {
+        if ($isEmergency) {
             $reason = (string) ($data['reason'] ?? '');
             $message = (string) ($data['message'] ?? '');
 
