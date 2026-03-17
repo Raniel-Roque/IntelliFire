@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Kreait\Firebase\Contract\Database;
-use App\Actions\PushRoomUpdateNotification;
 
 class AppDoorStatusController extends Controller
 {
@@ -66,8 +65,6 @@ class AppDoorStatusController extends Controller
             'door_status' => $status,
             'updated_at' => now()->toIso8601String(),
         ]);
-
-        PushRoomUpdateNotification::push($database, $roomId, $roomNumber, $roomName, $status);
 
         return response()->json(['ok' => true]);
     }
