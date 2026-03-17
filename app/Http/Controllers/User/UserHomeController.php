@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Actions\PushRoomUpdateNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Kreait\Firebase\Contract\Database;
@@ -77,12 +76,6 @@ class UserHomeController extends Controller
             'door_status' => $next,
             'updated_at' => now()->toIso8601String(),
         ]);
-
-        $roomNumber = (is_array($room) && isset($room['room_number']) && is_numeric($room['room_number']))
-            ? (int) $room['room_number']
-            : null;
-        $roomName = (is_array($room) && isset($room['name'])) ? (string) $room['name'] : null;
-        PushRoomUpdateNotification::push($database, (string) $roomId, $roomNumber, $roomName, $next);
 
         return redirect()->route('user.home');
     }

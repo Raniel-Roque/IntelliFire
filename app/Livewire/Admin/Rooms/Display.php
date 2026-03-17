@@ -5,7 +5,6 @@ namespace App\Livewire\Admin\Rooms;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Kreait\Firebase\Contract\Database;
-use App\Actions\PushRoomUpdateNotification;
 use Carbon\Carbon;
 
 class Display extends Component
@@ -143,14 +142,8 @@ class Display extends Component
 
         app(Database::class)->getReference('rooms/'.$roomId)->update([
             'door_status' => $next,
-            'updated_at' => now()->toISOString(),
+            'updated_at' => now()->toIso8601String(),
         ]);
-
-        $roomNumber = (is_array($data) && isset($data['room_number']) && is_numeric($data['room_number']))
-            ? (int) $data['room_number']
-            : null;
-        $roomName = (is_array($data) && isset($data['name'])) ? (string) $data['name'] : null;
-        PushRoomUpdateNotification::push(app(Database::class), $roomId, $roomNumber, $roomName, $next);
 
         $this->dispatch('showToast', message: 'Door status updated.', type: 'success');
         $this->dispatch('refreshRooms');
@@ -160,7 +153,7 @@ class Display extends Component
     {
         app(Database::class)->getReference('rooms/'.$roomId)->update([
             'response' => 'no response',
-            'updated_at' => now()->toISOString(),
+            'updated_at' => now()->toIso8601String(),
         ]);
 
         $this->dispatch('showToast', message: 'Response reset.', type: 'success');
